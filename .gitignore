@@ -37,3 +37,22 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# optional
+########################
+## Added ignore files ##
+########################
+
+# for knitted html
+*.html
+# for MacOS system files
+.DS_Store
+Icon
+Icon?
+# for VS code configs
+*.code-workspace
+.vscode/*
+
+# Ignore zip files
+*.zip
+*.Rproj
