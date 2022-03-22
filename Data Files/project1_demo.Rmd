@@ -1,0 +1,16 @@
+---
+title: "DS_project1"
+author: "Jane"
+date: "3/22/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## project1
+
+```{r}
+
+```
