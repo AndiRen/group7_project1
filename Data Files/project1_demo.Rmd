@@ -226,6 +226,13 @@ telco_cor <- round(cor(telco[,c("Tenure.Months", "Monthly.Charges", "Total.Charg
 ggcorrplot(telco_cor,  title = "Correlation")+theme(plot.title = element_text(hjust = 0.5))
 
 ```
+```{r}
+cor(telco)
+```
+
+
+
+
 * positive corr
 
 paperless.billing--yes
@@ -251,18 +258,31 @@ telco$Internet.Service <- as.factor(telco$Internet)
 telco$Online.Security <- as.factor(telco$Online.Security)
 telco$Online.Backup <- as.factor(telco$Online.Backup)
 telco$Paperless.Billing <- as.factor(telco$Paperless.Billing)
-telco$contract <- as.factor(telco$contract)
+telco$Contract <- as.factor(telco$Contract)
 telco$Payment.Method <- as.factor(telco$Payment.Method)
+```
+
+```{r}
+summary(telco)
+```
+
+
+```{r}
+anov <- lm(Churn.Score~Senior.Citizen+Payment.Method, data=telco)
+summary(anov)
+```
+```{r}
+m1 <- lm(Churn.Score~Paperless.Billing+Senior.Citizen+Payment.Method+Partner+Dependents+Tech.Support+Internet.Service+Online.Security+Contract, data=telco)
+summary(m1)
 ```
 
 
 
 
-
-
-
-
-
+```{r}
+m2 <- lm(Churn.Score~Tenure.Months+Monthly.Charges+Total.Charges, data = telco)
+summary(m2)
+```
 
 
 
