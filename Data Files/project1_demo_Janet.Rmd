@@ -214,14 +214,14 @@ cor(telco)
 
 paperless.billing--yes
 payment method--electron check
-contract---monthly
-InternetServices --Fiber Optic
+contract---monthly(A)
+InternetServices --Fiber Optic(A)
 OnlineSecurity ---no
 OnlineBackup--no
 TechSupport ---no
 Partners---no
-Dependents---no
-senior---yes???????
+Dependents---no(A)
+senior---yes???????(A)
 ```{r}
 glimpse(telco)
 ```
