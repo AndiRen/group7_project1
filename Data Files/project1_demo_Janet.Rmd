@@ -91,18 +91,6 @@ ggtitle("Churn Percent")
 ```
 * around 26% of ustomer left the platform within the last month.
 
-```{r}
-library(cowplot)
-options(repr.plot.width = 12, repr.plot.height = 8)
-plot_grid(ggplot(telco, aes(x=Gender,fill=Churn.Label))+ geom_bar()+ theme1, 
-          ggplot(telco, aes(x=Senior.Citizen,fill=Churn.Label))+ geom_bar(position = 'fill')+theme1,
-          ggplot(telco, aes(x=Partner,fill=Churn.Label))+ geom_bar(position = 'fill')+theme1,
-          ggplot(telco, aes(x=Dependents,fill=Churn.Label))+ geom_bar(position = 'fill')+theme1,
-          ggplot(telco, aes(x=Phone.Service,fill=Churn.Label))+ geom_bar(position = 'fill')+theme1,
-          ggplot(telco, aes(x=Multiple.Lines,fill=Churn.Label))+ geom_bar(position = 'fill')+theme_bw()+
-          scale_x_discrete(labels = function(x) str_wrap(x, width = 10)),
-          align = "h")
-```
 
 ```{r}
 options(repr.plot.width = 12, repr.plot.height = 8)
@@ -175,17 +163,6 @@ TechSupport ---no
 Partners---no
 Dependents---no
 senior---yes???????
-
-```{r}
-plot_grid(ggplot(telco, aes(x=Churn.Reason,fill=Churn.Label))+ 
-          geom_bar(position = 'fill')+ theme_bw()+
-          scale_x_discrete(labels = function(x) str_wrap(x, width = 10)), align = "h")
-```
-
-
-
-
-
 
 
 
@@ -266,23 +243,33 @@ telco$Payment.Method <- as.factor(telco$Payment.Method)
 summary(telco)
 ```
 
+# test of independent ( more than three levels)
+```{r ,results='markup'}
+x <- table(Adata2$admit,Adata2$rank)
+x
+#Both the variables are qualitative variables
 
-```{r}
-anov <- lm(Churn.Score~Senior.Citizen+Payment.Method, data=telco)
-summary(anov)
-```
-```{r}
-m1 <- lm(Churn.Score~Paperless.Billing+Senior.Citizen+Payment.Method+Partner+Dependents+Tech.Support+Internet.Service+Online.Security+Contract, data=telco)
-summary(m1)
 ```
 
 
+```{r,results='hold'}
+chitest <- chisq.test(x)
 
+chitest
+pvalue<-chitest$p.value
+pvalue
 
-```{r}
-m2 <- lm(Churn.Score~Tenure.Months+Monthly.Charges+Total.Charges, data = telco)
-summary(m2)
+#p-value is less than 0.05 so sonclusion is not independent
 ```
+
+
+
+
+
+
+
+
+
 
 
 
