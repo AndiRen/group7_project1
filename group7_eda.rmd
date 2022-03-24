@@ -1,0 +1,211 @@
+---
+title: "Group 7 Project 1: EDA"
+author: "Group 7"
+date: "3/24/2022"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = F, message = F)
+options(scientific=T, digits = 3) 
+
+#install.packages("DT")
+#install.packages("tidyverse")
+#install.packages("ezids")
+#install.packages("knitr")
+#install.packages("kableExtra")
+#install.packages("xtable")
+
+library(DT)
+library(tidyverse)
+library(ezids)
+library(knitr)
+library(kableExtra)
+library(xtable)
+```
+
+# 1. Intro
+
+### 1.1 Data Set Overview 
+
+The Data Set is a fictional data set provided by IBM. It provides the demographic information on the customers of a telecommunications company, data on the services each customer used, charges paid (etc.), as well as whether the customer "churned" or not -- meaning, whether the customer left the company. It also includes data on the reason(s) each customer who did leave gave for leaving. 
+
+### 1.2 SMART Questions
+
+Ultimately, the goal is to produce a model for predicting customer churn. This initial project will focus on a basic EDA of the data set in preparation of building such a model. Therefore I want to achieve 2 things:
+
+1. Which of the variables in the data set show a statistical difference between the churn and non-churn groupings?  
+-This will require doing 2-sample t-tests for continuous variables, and Chi Squared tests for categorical ones.  
+-If a variables passes its tests (i.e. p-value <= 0.05), that would suggest that it had a measurable effect on the decision to churn and can be used for modeling.
+
+2. Of the variables that show a statistical difference between the churn and non-churn groupings, which are strong predictors of churn?
+-This will require creating model, for example, a logistical regression, and examining the adjusted r^2 value.  
+-This question will be answered in Project 2
+
+3. Of the variables that are strong predictors of churn, which are actually providing useful information?
+-This will require critically thinking about what the variable is actually telling us.  
+-For example, it is likely that satisfaction score is more or less a corollary of churn and non-churn. Of course customers who churn are unsatisfied.  
+-Therefore, even though some variable might be strong predictors, they may not be actually helping us understand churn vs. non-churn.  
+-This question will be answered in Project 2
+
+### 1.3 Report Organization and Analysis Steps
+
+1. Prepare and describe data in data set  
+2. Divide into churn and non-churn groupings  
+3. Graph variables according to churn groupings to see if any obvious visual differences in the variables between churn groups  
+4. Conduct appropriate test for each variable to determine if there is a statistical difference between churn groups for each variable 
+5. Comment on results and propose next steps
+
+# 2. Description of Data
+
+### 2.1 Load data  and join data sets
+
+*Load Data Sets...*
+
+```{r}
+#Main data set
+churn_df <- data.frame(read_csv('Data Files/Telco_customer_churn.csv', col_types=cols()))
+
+#additional data set
+churn_status_df <- data.frame(read_csv('Data Files/Telco_customer_churn_status.csv', col_types = cols()))
+churn_services_df <- data.frame(read_csv('Data Files/Telco_customer_churn_services.csv', col_types = cols()))
+
+```
+data set `churn_df` loaded...  
+data set `churn_status_df` loaded...  
+data set `churn_services_df` loaded...
+
+*Join Data Sets...*
+```{r}
+#Filter columns to join from status_df
+status_join <- churn_status_df %>%
+  select(c(Customer.ID, Satisfaction.Score, Churn.Category))
+#status_join
+
+#Filer columns to join from services)df
+service_join <- churn_services_df %>%
+  select(c(Customer.ID, Avg.Monthly.Long.Distance.Charges, Avg.Monthly.GB.Download, Unlimited.Data, Total.Extra.Data.Charges))
+#service_join
+
+#Join status with churn
+joined_churn_df <- merge(churn_df, status_join, by.x="CustomerID", by.y="Customer.ID")
+#head(joined_churn_df)
+
+#Join service with churn
+joined_churn_df <- merge(joined_churn_df, service_join, by.x="CustomerID", by.y="Customer.ID")
+#head(joined_churn_df)
+
+```
+data sets joined...
+
+### 2.2 Summary of data set structure
+```{r results='markup', comment=NA}
+str(joined_churn_df)
+```
+
+**Comments describing the data structure will be done here**
+
+### 2.3 Display joined data set
+```{r results='markup'}
+DT::datatable(joined_churn_df, 
+         extensions = c('FixedColumns',"FixedHeader"),
+          options = list(scrollX = TRUE, 
+                         paging=TRUE,
+                         fixedHeader=TRUE))
+#xkabledplyhead(joined_churn_df, title = "Churn Data Set")
+```
+
+# 3. Examine Data
+
+### 3.1 Loading functions to use for analysis
+
+```{r}
+#Create updated xkable_summary function to delete unwatned text
+xkablesum_updated <- function (df, title = "Table: Statistics summary.", digits = 4, 
+          pos = "left", bso = "striped") 
+{
+    s = summary(df)
+    
+    # Including RE NA's strip
+    # Needed to add a dim check because incuding NA strip when no NA row made a new 7th row with text Min.: 
+    if (dim(s)[1] == 6) {
+      strip_vector = c("Min.\\s*:\\s*", "1st Qu.\\s*:\\s*", "Median\\s*:\\s*", "Mean\\s*:\\s*", 
+                       "3rd Qu.\\s*:\\s*", "Max.\\s*:\\s*")
+    }
+    # NA's strip RE added here
+    else if (dim(s)[1] == 7) {
+      strip_vector = c("Min.\\s*:\\s*", "1st Qu.\\s*:\\s*", "Median\\s*:\\s*", "Mean\\s*:\\s*", 
+                       "3rd Qu.\\s*:\\s*", "Max.\\s*:\\s*", "NA's\\s*:\\s*")
+    }
+    
+    # Made s = apply() -- without, didn't apply changes to table
+    s <- apply(s, 2, function(x) stringr::str_remove_all(x, strip_vector))
+    
+    # Made s = apply()
+    s <- apply(s, 2, function(x) stringr::str_trim(x, "right"))
+    colnames(s) <- stringr::str_trim(colnames(s))
+    
+    if (dim(s)[1] == 6) {
+        rownames(s) <- c("Min", "Q1", "Median", 
+                         "Mean", "Q3", "Max")
+    }
+    else if (dim(s)[1] == 7) {
+        rownames(s) <- c("Min", "Q1", "Median", 
+                         "Mean", "Q3", "Max", "NA")
+    }
+    xkabledply(s, title = title, digits = digits, pos = pos, 
+               bso = bso)
+}
+
+#Better looking version of 2-sample t-test results
+ttest2sample_info <- function(test) {
+  if (test[["p.value"]] <= 0.05) {
+  result = 'Reject the Null Hypothesis'
+  } else {
+    result = 'Do not reject the Null Hypothesis'
+  }
+  
+  cat(c('\t', test$method, '\n\n',
+      'Data:                       ', '|   ', test$data.name, '\n',
+      'Null Hypothesis:            ', '|   true difference in means = ', test$null.value[1], '\n',
+      'Alternative Hypothesis:     ', '|   true difference in means != ', test$null.value[1], '\n',
+      'Confidence Level:           ', '|   ', attributes(test$conf.int)$conf.level, '\n',
+      'Confidence Interval:        ', '|   [', round(test$conf.int[1], 2), ', ', round(test$conf.int[2], 2)), ']\n',
+      'Sample Estimates of Mean:   ', '|   [X = ', test$estimate[1], ', Y = ', test$estimate[2], ']\n',
+      'Test Values:                ', '|   [t = ', test$statistic,
+                                   ', |   df = ', test$parameter[1],
+                                   ', |   p-value = ', test[["p.value"]], ']\n',
+      'Result:                     ', '|   ', result, sep='') 
+}
+
+```
+
+*functions loaded...*
+
+### 3.2 Summary Tables of Continuous variables, Divided by Churn Groupings
+
+```{r results='markup'}
+joined_churn_df %>%
+  select(c(Tenure.Months, Monthly.Charges, Avg.Monthly.Long.Distance.Charges, Total.Extra.Data.Charges, Avg.Monthly.GB.Download, Satisfaction.Score)) %>%
+  xkablesum_updated(title='Summary Statistics for Churn Data Set (ALL)')
+
+joined_churn_df %>%
+  filter(Churn.Value == 1) %>%
+  select(c(Tenure.Months, Monthly.Charges, Avg.Monthly.Long.Distance.Charges, Total.Extra.Data.Charges, Avg.Monthly.GB.Download, Satisfaction.Score)) %>%
+  xkablesum_updated(title='Summary Statistics for Churn Data Set (Left)')
+
+joined_churn_df %>%
+  filter(Churn.Value == 0) %>%
+  select(c(Tenure.Months, Monthly.Charges, Avg.Monthly.Long.Distance.Charges, Total.Extra.Data.Charges, Avg.Monthly.GB.Download, Satisfaction.Score)) %>%
+  xkablesum_updated(title='Summary Statistics for Churn Data Set (Stayed)')
+
+```
