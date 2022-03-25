@@ -51,10 +51,12 @@ is.null(telco)
 ```
 
 ```{r}
+#Summary of the dataset
 summary(telco)
 ```
 
 ```{r}
+# Descriptive Statistics
 library(Hmisc)
 describe(telco)
 
@@ -266,7 +268,7 @@ chitest
 pvalue<-chitest$p.value
 pvalue
 
-#p-value <2e-16, it is not independent. Tech support has impact on churn/not churn.
+#p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
 #Online.Security
 
@@ -280,7 +282,7 @@ chitest
 pvalue<-chitest$p.value
 pvalue
 
-#p-value <2e-16, it is not independent. Tech support has impact on churn/not churn.
+#p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
 
 
@@ -296,7 +298,7 @@ chitest
 pvalue<-chitest$p.value
 pvalue
 
-#p-value <2e-16, it is not independent. Tech support has impact on churn/not churn.
+#p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
 
 # Payment.Method
@@ -310,7 +312,7 @@ chitest
 pvalue<-chitest$p.value
 pvalue
 
-#p-value <2e-16, it is not independent. Tech support has impact on churn/not churn.
+#p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
 
 
@@ -318,10 +320,20 @@ pvalue
 
 #Partner 2
 ```{r}
-freq_churn
+test <- chisq.test(table(telco$Churn.Label, telco$Partner))
+test
+#p-value <2e-16, it is not independent. The two variables relate to each other.
+
 ```
 
+# Paperless.Billing
 
+```{r}
+test1 <- chisq.test(table(telco$Churn.Label, telco$Paperless.Billing))
+test1
+#p-value <2e-16, it is not independent. The two variables relate to each other.
+
+```
 
 
 
