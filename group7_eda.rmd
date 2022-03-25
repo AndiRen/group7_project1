@@ -671,6 +671,8 @@ chigoodness_senior = chisq.test(freq_churn_senior$count, p=perc_freq_senior)
 chigoodness_senior
 ```
 
+**This line is added as a test**
+
 ---
 
 #### **Partner**
