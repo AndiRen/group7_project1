@@ -37,6 +37,9 @@ library(xtable)
 
 # 1. Intro
 
+<br>
+<br>
+
 ### 1.1 Data Set Overview 
 
 The Data Set is a fictional data set provided by IBM. It provides the demographic information on the customers of a telecommunications company, data on the services each customer used, charges paid (etc.), as well as whether the customer "churned" or not -- meaning, whether the customer left the company. It also includes data on the reason(s) each customer who did leave gave for leaving. 
@@ -44,6 +47,9 @@ The Data Set is a fictional data set provided by IBM. It provides the demographi
 The `churn` variable indicates whether a customer left the company in the last month. The graph below shows the percentage of churners in the data set:  
 
 **INSERT CHURN GRAPH HERE**
+
+<br>
+<br>
 
 ### 1.2 SMART Questions
 
@@ -63,6 +69,9 @@ Ultimately, the goal is to produce a model for predicting customer churn. This i
 -Therefore, even though some variable might be strong predictors, they may not be actually helping us understand churn vs. non-churn.  
 -This question will be answered in Project 2
 
+<br>
+<br>
+
 ### 1.3 Report Organization and Analysis Steps
 
 1. Prepare and describe data in data set  
@@ -71,7 +80,13 @@ Ultimately, the goal is to produce a model for predicting customer churn. This i
 4. Conduct appropriate test for each variable to determine if there is a statistical difference between churn groups for each variable 
 5. Comment on results and propose next steps
 
+<br>
+<br>
+
 # 2. Description of Data
+
+<br>
+<br>
 
 ### 2.1 Load data  and join data sets
 
@@ -175,14 +190,17 @@ ttest2sample_info <- function(test) {
       'Confidence Interval:        ', '|   [', round(test$conf.int[1], 2), ', ', round(test$conf.int[2], 2)), ']\n',
       'Sample Estimates of Mean:   ', '|   [X = ', test$estimate[1], ', Y = ', test$estimate[2], ']\n',
       'Test Values:                ', '|   [t = ', test$statistic,
-                                   ', |   df = ', test$parameter[1],
-                                   ', |   p-value = ', test[["p.value"]], ']\n',
+                                   ', df = ', test$parameter[1],
+                                   ', p-value = ', test[["p.value"]], ']\n',
       'Result:                     ', '|   ', result, sep='') 
 }
 
 ```
 
 *functions loaded...*
+
+<br>
+<br>
 
 ### 2.2 Summary of data set structure
 ```{r results='markup', comment=NA}
@@ -272,7 +290,13 @@ The final data frame, `filtered_joined_churn_df`, consists of [`r ncol(filtered_
 20. ``r names(filtered_joined_churn_df)[20]`` [whether customer has unlimited data plan]
 21. ``r names(filtered_joined_churn_df)[21]`` [lifetime extra data charges customer has accrued]
 
+<br>
+<br>
+
 ### 2.3 Summary information on final data set
+
+<br>
+<br>
 
 #### Summary Tables of Continuous variables, Divided by Churn Groupings
 
@@ -303,9 +327,15 @@ joined_churn_df %>%
 **TO DO** -- or just do in one table  
 -will require turning these variables into factors
 
+<br>
+<br>
+
 ### 2.4 Checking for NA's
 
 **From Janet** -- use the Hmisc describe here?
+
+<br>
+<br>
 
 ### 2.5 Display joined and filted data set
 ```{r results='markup'}
@@ -321,11 +351,22 @@ DT::datatable(filtered_joined_churn_df,
 #xkabledplyhead(joined_churn_df, title = "Churn Data Set")
 ```
 
+<br>
+<br>
+
 # 3. Graph Variables for Visual Comparison
+
+<br>
+<br>
 
 ### 3.1 Continuous Variables
 
-#### Tenure in Months
+<br>
+<br>
+
+---
+
+#### **Tenure in Months**
 
 ```{r}
 #Histograms
@@ -369,7 +410,9 @@ This can be seen in the shape of the histograms, as well as the fact that the me
 
 Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.underline}.
 
-#### Avg. Monthly Charges
+---
+
+#### **Avg. Monthly Charges**
 
 ```{r}
 #Histograms
@@ -412,20 +455,31 @@ This can be seen in the shape of the histograms, while the mean lines in the box
 
 Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.underline}.
 
-**Visually, it looks like those who left have a different satisfaction rating**  
-In fact, there is not overalap *at all* between the satisfcation scores of the chun and non-churn groups.  
-*Interestingly, in the histograms there was a similar pattern of step-wise decrease in scores, just on the low vs. the high end*
+---
 
-#### Avg. Monthly Long-Distance Charges
+#### **Avg. Monthly Long-Distance Charges**
 
-#### Avg. Monthly GB Download 
+---
 
-#### Total Extra Data Charges
+#### **Avg. Monthly GB Download** 
 
+---
+
+#### **Total Extra Data Charges**
+
+---
+
+<br>
+<br>
 
 ### 3.2 Categorical Variables
 
-#### Senior Citizen
+<br>
+<br>
+
+---
+
+#### **Senior Citizen**
 
 ```{r}
 joined_churn_df %>%
@@ -439,21 +493,37 @@ joined_churn_df %>%
 **Visually, there appears to be more senior citizens in the churn group than the non-churn group**  
 This suggests being a senior affected whether someone decided to churn
 
-#### Partner
+---
 
-#### Dependents
+#### **Partner**
 
-#### Phone Service
+---
 
-#### Internet Service
+#### **Dependents**
 
-#### Online Security
+---
 
-#### Online Backup
+#### **Phone Service**
 
-#### Tech Support
+---
 
-#### Contract Type
+#### **Internet Service**
+
+---
+
+#### **Online Security**
+
+---
+
+#### **Online Backup**
+
+---
+
+#### **Tech Support**
+
+---
+
+#### **Contract Type**
 
 ```{r}
 joined_churn_df %>%
@@ -467,11 +537,17 @@ joined_churn_df %>%
 **Visually, there appears to be far more month-to-month contract customers in the churn group than the non-churn group**  
 This suggests contract type affected whether someone decided to churn
 
-#### Paperless Billing
+---
 
-#### Pament Method
+#### **Paperless Billing**
 
-#### Satisfaction Score
+---
+
+#### **Pament Method**
+
+---
+
+#### **Satisfaction Score**
 
 ```{r}
 #Had to add it as.factor()
@@ -487,10 +563,19 @@ joined_churn_df %>%
 This suggests the rating given affects whether someone decided to churn.  
 However, the complete lack of overlap is suspicious, or may indicate this variable needs to be considered differently.
 
-#### Unlimited Data
+---
 
+#### **Unlimited Data**
+
+---
+
+<br>
+<br>
 
 # 4. Tests for Variables to Check for Statistical Signficance of Differences/Independence 
+
+<br>
+<br>
 
 ### 4.1 Continuous Variables -- 2-sample T-tests
 
@@ -500,45 +585,176 @@ For each continuous variable being examined, the means of the churn and the non-
 The true difference in the means *between the `churn` and the `non-churn` group* [is 0]{.underline}.
 
 A *p-value* [<= 0.05]{.underline} will result in this null hypothesis being [rejected]{.underline} and there [being sufficient evidence]{.underline} to argue that there is a *real difference in the means* of the churn and non-churn grouping for a given variable.
+<br>
 
-#### Tenure in Months --
+---
 
-#### Avg. Monthly Charges --
+#### **Tenure in Months**
 
-#### Satisfaction Score --
+```{r results='markdown', comment=NA}
+ttest2sample_tenure = t.test(only_churn$Tenure.Months,no_churn$Tenure.Months)
+cat("\nt-test object's display of results\n")
+ttest2sample_tenure
+cat("\nAndy's function's display of results\n\n")
+ttest2sample_info(ttest2sample_tenure)
+```
 
-#### Avg. Monthly Long-Distance Charges --
+**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}**  
+As a result of there being a real difference in the means of the churn and non-churn groups with respective to their `Tenure`, this suggests `Tenure` affects whether a customer chooses to churn or not.  
 
-#### Avg. Monthly GB Download 
+---
 
-#### Total Extra Data Charges
+#### **Avg. Monthly Charges**
 
+```{r results='markup', comment=NA}
+ttest2sample_monthlyCharge = t.test(only_churn$Monthly.Charges,no_churn$Monthly.Charges)
+#ttest2sample_monthlyCharge
+ttest2sample_info(ttest2sample_monthlyCharge)
 
-### 3.2 Categorical Variables -- Goodness of Fit and Test of Independence
+```
 
-#### Senior Citizen
+**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}**  
+As a result of there being a real difference in the means of the churn and non-churn groups with respective to their `Avg. Monthly Charges`, this suggests `Avg. Monthly Charges` affects whether a customer chooses to churn or not.  
 
-#### Partner
+---
 
-#### Dependents
+#### **Satisfaction Score (Move to categorical)**
 
-#### Phone Service
+---
 
-#### Internet Service
+#### **Avg. Monthly Long-Distance Charges**
 
-#### Online Security
+```{r results='markup', comment=NA}
+ttest2sample_longDistance = t.test(only_churn$Avg.Monthly.Long.Distance.Charges,no_churn$Avg.Monthly.Long.Distance.Charges)
+#ttest2sample_longDistance
+ttest2sample_info(ttest2sample_longDistance)
 
-#### Online Backup
+```
 
-#### Tech Support
+**The results of the test returned a [p-value greater than 0.05]{.underline}. As a result, we [do not reject the Null Hypothesis]{.underline}**  
+Since we cannot say that there is a real difference in the means of the churn and non-churn groups with respective to their `Avg. Monthly Long Distance Charges`, this suggests `Avg. Monthly Long Distance Charges` does not affect whether a customer chooses to churn or not.  
 
-#### Contract Type
+---
 
-#### Paperless Billing
+#### **Avg. Monthly GB Download** 
 
-#### Pament Method
+---
 
-#### Unlimited Data
+#### **Total Extra Data Charges**
+
+---
+
+<br>
+<br>
+
+### 4.2 Categorical Variables -- Goodness of Fit and Test of Independence
+
+<br>
+<br>
+
+---
+
+#### **Senior Citizen**
+
+```{r results='markup'}
+freq_churn_senior <- only_churn %>%
+  group_by(Senior.Citizen) %>%
+  summarise(count = n())
+
+freq_pop_senior <- joined_churn_df %>%
+  group_by(Senior.Citizen) %>%
+  summarise(count = n())
+
+perc_freq_senior = freq_pop_senior$count/nrow(joined_churn_df)
+
+chigoodness_senior = chisq.test(freq_churn_senior$count, p=perc_freq_senior)
+chigoodness_senior
+```
+
+---
+
+#### **Partner**
+
+---
+
+#### **Dependents**
+
+---
+
+#### **Phone Service**
+
+---
+
+#### **Internet Service**
+
+---
+
+#### **Online Security**
+
+---
+
+#### **Online Backup**
+
+---
+
+#### **Tech Support**
+
+---
+
+#### **Contract Type**
+
+```{r results='markup'}
+freq_churn_contract <- only_churn %>%
+  group_by(Contract) %>%
+  summarise(count = n())
+
+freq_pop_contract <- joined_churn_df %>%
+  group_by(Contract) %>%
+  summarise(count = n())
+
+perc_freq_contract = freq_pop_contract$count/nrow(joined_churn_df)
+
+chigoodness_contract = chisq.test(freq_churn_contract$count, p=perc_freq_contract)
+chigoodness_contract
+```
+
+---
+
+#### **Paperless Billing**
+
+---
+
+#### **Payment Method**
+
+---
+
+#### **Satisfaction Score**
+
+```{r results='markup'}
+#error
+# Error in chisq.test(freq_churn_sat$count, p = perc_freq_sat) : 
+# 'x' and 'p' must have the same number of elements
+#ned to fix
+
+# freq_churn_sat <- only_churn %>%
+#   group_by(Satisfaction.Score) %>%
+#   summarise(count = n())
+# 
+# freq_pop_sat <- joined_churn_df %>%
+#   group_by(Satisfaction.Score) %>%
+#   summarise(count = n())
+# 
+# perc_freq_sat = freq_pop_sat$count/nrow(joined_churn_df)
+# 
+# chigoodness_sat = chisq.test(freq_churn_sat$count, p=perc_freq_sat)
+# chigoodness_sat
+```
+
+---
+
+#### **Unlimited Data**
+
+---
 
 
 
