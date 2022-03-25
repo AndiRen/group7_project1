@@ -459,6 +459,8 @@ Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.
 
 #### **Avg. Monthly Long-Distance Charges**
 
+Test text for merge example
+
 ---
 
 #### **Avg. Monthly GB Download** 
