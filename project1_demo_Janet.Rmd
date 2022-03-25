@@ -33,7 +33,7 @@ library(ggcorrplot)
 ##  the behavior of telecom customers who are more likely to leave the platform. I intend to find out the most striking behavior of customers through EDA
 
 ```{r}
-telco = data.frame(read.csv("Telco_customer_churn.csv", header = TRUE))
+telco = data.frame(read.csv("Data Files/Telco_customer_churn.csv", header = TRUE))
 head(telco, n=10)
 # 33 variables.
 ```
@@ -192,7 +192,7 @@ ggcorrplot(telco_cor,  title = "Correlation")+theme(plot.title = element_text(hj
 
 ```
 ```{r}
-cor(telco)
+#cor(telco)
 ```
 
 
