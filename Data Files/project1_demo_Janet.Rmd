@@ -154,20 +154,6 @@ plot_grid(ggplot(telco, aes(x=Streaming.Movies,fill=Churn.Label))+
 *Churn percent is higher in case of cutsomers having paperless billing option.
 *Customers who have ElectronicCheck PaymentMethod tend to leave the platform more when compared to other options.
 
-in categorical variable:
-paperless.billing--yes
-payment method--electron check
-contract---monthly
-InternetServices --Fiber Optic
-OnlineSecurity ---no
-OnlineBackup--no
-TechSupport ---no
-Partners---no
-Dependents---no
-senior---yes???????
-
-
-
 
 ```{r}
 options(repr.plot.width =6, repr.plot.height = 2)
@@ -214,17 +200,19 @@ cor(telco)
 
 * positive corr
 
+# vairables that relate to churn according to plots.
 paperless.billing--yes
 payment method--electron check
-contract---monthly(A)
-InternetServices --Fiber Optic(A)
+contract---monthly
+InternetServices --Fiber Optic
 OnlineSecurity ---no
 OnlineBackup--no
 TechSupport ---no
 Partners---no
-Dependents---no(A)
-senior---yes???????(A)
+Dependents---no
+senior---yes
 ```{r}
+# summary
 glimpse(telco)
 ```
 
