@@ -1,7 +1,7 @@
 ---
 title: "Group 7 Project 1: EDA"
-author: "Group 7"
-date: "3/24/2022"
+author: "Andy Christian, Yaxin (Janet) Zhuang, Adhithya Kiran"
+date: "3/28/2022"
 output:
   html_document:
     code_folding: hide
@@ -25,6 +25,7 @@ options(scientific=T, digits = 3)
 #install.packages("knitr")
 #install.packages("kableExtra")
 #install.packages("xtable")
+#install.packages('Hmisc')
 
 #load packages
 library(DT)
@@ -33,6 +34,7 @@ library(ezids)
 library(knitr)
 library(kableExtra)
 library(xtable)
+library(Hmisc)
 ```
 
 # 1. Intro
@@ -183,7 +185,23 @@ ttest2sample_info <- function(test) {
 
 This data set is a fictional data set provided by IBM. It includes the demographic information on the customers of a telecommunications company, data on the services each customer used, charges paid (etc.), as well as whether the customer "churned" or not -- meaning, whether the customer *left the company in the past month*. It also includes data on the reason(s) each customer who did leave gave for leaving.
 
-**INSERT CHURN GRAPH:**  
+**From the graph below, we see that around 26% of customer left the platform within the last month.**
+
+```{r}
+options(repr.plot.width = 6, repr.plot.height = 4)
+filtered_joined_churn_df %>% 
+group_by(Churn.Label) %>% 
+summarise(Count = n())%>% 
+mutate(percent = prop.table(Count)*100)%>%
+ggplot(aes(reorder(Churn.Label, -percent), percent), fill = Churn)+
+geom_col(fill = c("#FC4E07", "#E7B800"))+
+geom_text(aes(label = sprintf("%.2f%%", percent)), hjust = 0.01,vjust = -0.5, size =3)+ 
+theme_bw()+  
+xlab("Churn") + 
+ylab("Percent")+
+ggtitle("Churn Percent")
+```
+ 
 <br>
 
 ### 1.2 SMART Questions
@@ -371,8 +389,6 @@ filtered_joined_churn_df %>%
 
 Focusing in on the Churn Customers vs. Non-Churn Customers summary tables, for many categorical variables [there appears to be a difference in the frequency of churn customers who beloing to a given variable's level]{.underline}. For example, there are 1493 Churn Customers who are senior citizens and 476 who are not (~24%). For Non-Churn Customers, there are 4508 senior citizens and 666 non-seniors (~13%). While there are fewer non-senior's overall in the Churn Customer group, the percentage of seniors is higher compared to the Non-Churn group. The difference in frequency of these variables' levels will need to be analyzed.
 
-Also, it should be noted that the only NA's that appear are in the `Churn.Label` and `Churn.Reason` variables. This is because only Churn Customers answered these questions. These NA values do not affect the analysis of the data set.
-
 <br>
 <br>
 
@@ -418,13 +434,17 @@ At first glance, [there appears to be differences between the means of the Churn
 <br>
 <br>
 
-### 2.4 Checking for NA's
+### 2.4 Another Useful Descriptive Statistics Function that Also Checks for NA's
+
+From library `Hmisc`, using the `describe()` function
 
 ```{r, results='markup'}
-library(dplyr)
-glimpse(joined_churn_df)
+
+describe(filtered_joined_churn_df)
 
 ```
+
+It should be noted that the only NA's that appear are in the `Churn.Label` and `Churn.Reason` variables. This is because only Churn Customers answered these questions. These NA values do not affect the analysis of the data set.
 
 <br>
 <br>
@@ -1157,3 +1177,39 @@ chitest_ud
 `Churn` and `Unlimited.Data` are not independent of one another. Thus, this suggests that a customer's level of `Unlimited.Data` affects whether they choose to churn or not.
 
 ---
+
+<br>
+
+# 5. Conclusion
+
+<br>
+
+### 5.1 Answering SMART Question 1
+
+**1. *Which of the variables in the data set show a statistical difference between the churn and non-churn groupings?* **
+
+To answer this question, we divided the data into churn and non-churn groups, then visually explored how the data set's variables differed when divided into these groups. We then tested the differences using 2-sample t-tests, goodness of fit chi squared tests, and chi squared tests of independence. From this we determined that the following [15]{.inderline} variables *showed a statistical difference between the churn and non-churn groups:*
+
+* Tenure
+* Avg. Monthly Charges
+* Avg. Monthly GB Download
+* Senior Citizen
+* Partner
+* Dependents
+* Internet Service
+* Online Security
+* Online Backup
+* Tech Support
+* Contract Type
+* Paperless Billing
+* Payment Method
+* Satisfaction Score
+* Unlimited Data
+
+### 5.2 Looking Foward to Model Building and Ansering SMART Questions 2 & 3
+
+**2. *Of the variables that show a statistical difference between the churn and non-churn groupings, which are strong predictors of churn?* **
+
+**3. *Of the variables that are strong predictors of churn, which are actually providing useful information?* **  
+
+While these variables showed a statistical difference between the churn and non-churn groups, that does not necessarily mean that they are good for model building or tell us useful information. As we move forward with our project, we will need to think critically about contextualizing the analysis we have done here in order to select variables for our model that actually make sense in helping us answer our question about predicting whether a customer will churn. It is possible that some variables, while looking good for a model, don't logically connect to our question and may actually mask those variables more important to finding our answer. This will all be explored, evaluated, and addressed in our second project.
