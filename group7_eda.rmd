@@ -1195,15 +1195,6 @@ chitest_sat
 ```
 
 
-=======
-**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
-`Churn` and `Unlimited.Data` are not independent of one another. Thus, this suggests that a customer's level of `Unlimited.Data` affects whether they choose to churn or not.
-
----
-
-<br>
-
-
 # 5. Conclusion
 
 <br>
@@ -1238,7 +1229,3 @@ To answer this question, we divided the data into churn and non-churn groups, th
 
 
 While these variables showed a statistical difference between the churn and non-churn groups, that does not necessarily mean that they are good for model building or tell us useful information. As we move forward with our project, we will need to think critically about contextualizing the analysis we have done here in order to select variables for our model that actually make sense in helping us answer our question about predicting whether a customer will churn. It is possible that some variables, while looking good for a model, don't logically connect to our question and may actually mask those variables more important to finding our answer. This will all be explored, evaluated, and addressed in our second project.
-
-=======
-While these variables showed a statistical difference between the churn and non-churn groups, that does not necessarily mean that they are good for model building or tell us useful information. As we move forward with our project, we will need to think critically about contextualizing the analysis we have done here in order to select variables for our model that actually make sense in helping us answer our question about predicting whether a customer will churn. It is possible that some variables, while looking good for a model, don't logically connect to our question and may actually mask those variables more important to finding our answer. This will all be explored, evaluated, and addressed in our second project.
-
