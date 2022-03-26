@@ -553,11 +553,81 @@ Test text for merge example
 
 #### **Avg. Monthly GB Download**
 
+
+
+```{r}
+#Histograms
+joined_churn_df %>%
+  filter(Churn.Value==0) %>%
+  ggplot() +
+    geom_histogram(mapping=aes(x=Avg.Monthly.GB.Download), fill='#CC6666', color='#9999CC', boundary=0, binwidth=5) +
+    labs(title='Distribution of Avg Monthly GB Download (Stayed)', x=('Avg Monthly GB Download'), y=('Count')) +
+    theme(plot.title = element_text(hjust = 0.5))
+
+joined_churn_df %>%
+  filter(Churn.Value==1) %>%
+  ggplot() +
+    geom_histogram(mapping=aes(x=Avg.Monthly.GB.Download), fill='#CC6666', color='#9999CC', boundary=0, binwidth=5) +
+    labs(title='Distribution of Avg. Monthly GB Download (Left)', x=('Avg Monthly GB Download'), y=('Count')) +
+    theme(plot.title = element_text(hjust = 0.5))
+
+#QQ plot non-churn
+qqnorm(no_churn$Avg.Monthly.GB.Download,
+       main = "Avg. Monthly GB Download Q-Q Plot for Non-Churn Customers", ylab='Avg. Monthly GB Download Quantiles', col='#9999CC')
+qqline(no_churn$Monthly.Charges, col='#6633CC')
+
+#QQ plot GRE
+qqnorm(only_churn$Avg.Monthly.GB.Download,
+       main = "Avg. Monthly GB Download Q-Q Plot for Churn Customers", ylab='Avg. Monthly GB Download Quantiles', col='#CC6666')
+qqline(only_churn$Avg.Monthly.GB.Download, col='#663366')
+```
+
+
+**Visually, it looks like those who left have a different Avg monthly gb downloaded profile.**  
+This can be seen in the shape of the histograms, while the mean lines in the boxplot of the churn and non-churn groups do overlap with the other group's IQR, they still appear to be quite different.
+
+Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.underline}.
 ---
+
 
 #### **Total Extra Data Charges**
 
+
+```{r}
+#Histograms
+joined_churn_df %>%
+  filter(Churn.Value==0) %>%
+  ggplot() +
+    geom_histogram(mapping=aes(x=Total.Extra.Data.Charges), fill='#CC6666', color='#9999CC', boundary=0, binwidth=5) +
+    labs(title='Distribution of Total Extra Data Charges', x=('Total Extra Data Charges'), y=('Count')) +
+    theme(plot.title = element_text(hjust = 0.5))
+
+joined_churn_df %>%
+  filter(Churn.Value==1) %>%
+  ggplot() +
+    geom_histogram(mapping=aes(x=Total.Extra.Data.Charges), fill='#CC6666', color='#9999CC', boundary=0, binwidth=5) +
+    labs(title='Distribution of Total Extra Data Charges (Left)', x=('Total Extra Data Charges'), y=('Count')) +
+    theme(plot.title = element_text(hjust = 0.5))
+
+#QQ plot non-churn
+qqnorm(no_churn$Total.Extra.Data.Charges,
+       main = "Total Extra Data Charges Q-Q Plot for Non-Churn Customers", ylab='Total Extra Data Charges Quantiles', col='#9999CC')
+qqline(no_churn$Monthly.Charges, col='#6633CC')
+
+#QQ plot GRE
+qqnorm(only_churn$Total.Extra.Data.Charges,
+       main = "Avg. Total Extra Data Charges Q-Q Plot for Churn Customers", ylab='Total Extra Data Charges', col='#CC6666')
+qqline(only_churn$Total.Extra.Data.Charges, col='#663366')
+```
+
+
+**Visually, it looks like those who left have a different Total Extra Data Charges profile.**  
+This can be seen in the shape of the histograms, while the mean lines in the boxplot of the churn and non-churn groups do overlap with the other group's IQR, they still appear to be quite different.
+
+Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.underline}.
+
 ---
+
 
 <br>
 
@@ -595,14 +665,36 @@ ggplot(joined_churn_df, aes(x=Partner,fill=Churn.Label))+ geom_bar(position = 'f
 
 #### **Dependents**
 
+```{r}
+options(repr.plot.width = 12, repr.plot.height = 8)
+ggplot(joined_churn_df, aes(x=Dependents,fill=Churn.Label))+ geom_bar(position = 'fill')
+```
+
+
+**Visually, there appears to be more non dependents in the churn group than the non-churn group.**  
+This suggests being a dependency affected whether someone decided to churn.
 ---
 
 #### **Phone Service**
 
 ---
 
+```{r}
+options(repr.plot.width = 12, repr.plot.height = 8)
+ggplot(joined_churn_df, aes(x=Phone.Service,fill=Churn.Label))+ geom_bar(position = 'fill')
+```
+
+**Visually, there appears to be almost equal profiles having phone service and not having phone service in the churn group and in the non-churn group.**  
+This suggests being having a phone service not affected whether someone decided to churn.
+
 #### **Internet Service**
 
+```{r}
+options(repr.plot.width = 12, repr.plot.height = 8)
+ggplot(joined_churn_df, aes(x=Internet.Service,fill=Churn.Label))+ geom_bar(position = 'fill')
+```
+**Visually, there appears to be more profiles having fiber optics in the churn group than the non-churn group.**  
+This suggests being a Internet services affected whether someone decided to churn.
 ---
 
 #### **Online Security**
@@ -692,6 +784,16 @@ This suggests the rating given affects whether someone decided to churn.
 
 #### **Unlimited Data**
 
+```{r}
+#Had to add it as.factor()
+joined_churn_df %>%
+  ggplot() +
+  geom_bar(mapping=aes(x=Churn.Label, fill=as.factor(Unlimited.Data)), position = 'fill') +
+  labs(title='Frequency Unlimited Data in Churn Groupings', x=('Churn or Non-Churn'), y=('Per of Group Gave Unlimited Data')) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
 ---
 
 <br>
@@ -756,9 +858,29 @@ Since we cannot say that there is a real difference in the means of the churn an
 
 #### **Avg. Monthly GB Download**
 
+```{r results='markup', comment=NA}
+ttest2sample_AMG = t.test(only_churn$Avg.Monthly.GB.Download ,no_churn$Avg.Monthly.GB.Download )
+#ttest2sample_AMG
+ttest2sample_info(ttest2sample_AMG)
+
+```
+
+**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
+Since there is a real difference in the means of the churn and non-churn groups with respective to their `Avg.Monthly.GB.Download`, this suggests `Avg.Monthly.GB.Download` affects whether a customer chooses to churn or not.
 ---
 
 #### **Total Extra Data Charges**
+
+
+```{r results='markup', comment=NA}
+ttest2sample_Ex = t.test(only_churn$Total.Extra.Data.Charges ,no_churn$Total.Extra.Data.Charges)
+#ttest2sample_Ex
+ttest2sample_info(ttest2sample_Ex)
+
+```
+
+**The results of the test returned a [p-value greater than 0.05]{.underline}. As a result, we [accept the Null Hypothesis]{.underline}.**  
+Since there is no real difference in the means of the churn and non-churn groups with respective to their `Total.Extra.Data.Charges`, this suggests `Total.Extra.Data.Charges` do not affects whether a customer chooses to churn or not.
 
 ---
 
@@ -827,13 +949,34 @@ test_partner
 
 #### **Dependents**
 
+```{r}
+test_Dependents <- chisq.test(table(joined_churn_df$Churn.Label, joined_churn_df$Dependents))
+test_Dependents
+```
+**p-value <2e-16, it is not independent. The two variables relate to each other
 ---
 
 #### **Phone Service**
 
+
+
+```{r}
+test_PS <- chisq.test(table(joined_churn_df$Churn.Label, joined_churn_df$Phone.Service))
+test_PS
+```
+
+**p-value = .03, it is  independent. The two variables did not relate to each other
 ---
 
 #### **Internet Service**
+
+
+```{r}
+test_IS <- chisq.test(table(joined_churn_df$Churn.Label, joined_churn_df$Internet.Service))
+test_IS
+```
+
+**p-value <2e-16, it is not independent. The two variables relate to each other
 
 ---
 
@@ -958,4 +1101,21 @@ chitest_sat
 
 #### **Unlimited Data**
 
+
+```{r results='markup'}
+#Create contingency table
+contable_ud = table(as.integer(joined_churn_df$Churn.Value), filtered_joined_churn_df$Unlimited.Data)
+xkabledply(contable_sat, title="Contingency table for Churn Against Unlimited Data")
+
+```
+
+```{r}
+#conduct independence test with contingency table
+chitest_ud = chisq.test(contable_ud)
+chitest_ud
+
+```
+
+**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
+`Churn` and `Unlimited.Data` are not independent of one another. Thus, this suggests that a customer's level of `Unlimited.Data` affects whether they choose to churn or not.
 ---
