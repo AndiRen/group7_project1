@@ -898,7 +898,7 @@ chitest_contract
 
 #### **Paperless Billing**
 ```{r}
-test2 <- chisq.test(joined_churn_df(telco$Churn.Label, joined_churn_df$Paperless.Billing))
+test2 <- chisq.test(table(joined_churn_df$Churn.Label, joined_churn_df$Paperless.Billing))
 test2
 #p-value <2e-16, it is not independent. The two variables relate to each other.
 
