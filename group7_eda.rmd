@@ -1152,4 +1152,37 @@ chitest_sat
 
 ```
 
+# 5. Conclusion
+
+<br>
+
+### 5.1 Answering SMART Question 1
+
+**1. *Which of the variables in the data set show a statistical difference between the churn and non-churn groupings?* **
+
+To answer this question, we divided the data into churn and non-churn groups, then visually explored how the data set's variables differed when divided into these groups. We then tested the differences using 2-sample t-tests, goodness of fit chi squared tests, and chi squared tests of independence. From this we determined that the following [15]{.inderline} variables *showed a statistical difference between the churn and non-churn groups:*
+
+* Tenure
+* Avg. Monthly Charges
+* Avg. Monthly GB Download
+* Senior Citizen
+* Partner
+* Dependents
+* Internet Service
+* Online Security
+* Online Backup
+* Tech Support
+* Contract Type
+* Paperless Billing
+* Payment Method
+* Satisfaction Score
+* Unlimited Data
+
+### 5.2 Looking Foward to Model Building and Ansering SMART Questions 2 & 3
+
+**2. *Of the variables that show a statistical difference between the churn and non-churn groupings, which are strong predictors of churn?* **
+
+**3. *Of the variables that are strong predictors of churn, which are actually providing useful information?* **  
+
+While these variables showed a statistical difference between the churn and non-churn groups, that does not necessarily mean that they are good for model building or tell us useful information. As we move forward with our project, we will need to think critically about contextualizing the analysis we have done here in order to select variables for our model that actually make sense in helping us answer our question about predicting whether a customer will churn. It is possible that some variables, while looking good for a model, don't logically connect to our question and may actually mask those variables more important to finding our answer. This will all be explored, evaluated, and addressed in our second project.
 
