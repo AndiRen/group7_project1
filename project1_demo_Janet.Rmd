@@ -107,6 +107,11 @@ plot_grid(ggplot(telco, aes(x=Gender,fill=Churn.Label))+ geom_bar(),
 
 ```
 
+```{r}
+options(repr.plot.width = 12, repr.plot.height = 8)
+ggplot(telco, aes(x=Online.Backup,fill=Churn.Label))+ geom_bar(position = 'fill')+
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
 *Customers with Partners and Dependents have lower churn rate as compared to those who don't have partners & Dependents.
 *The percent of churn is higher in case of senior citizens
 
