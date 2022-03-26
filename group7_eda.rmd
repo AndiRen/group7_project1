@@ -590,6 +590,7 @@ ggplot(joined_churn_df, aes(x=Partner,fill=Churn.Label))+ geom_bar(position = 'f
 ```
 
 **Customers with Partners have lower churn rate as compared to those who don't have partners.**
+
 ---
 
 #### **Dependents**
@@ -611,6 +612,7 @@ ggplot(joined_churn_df, aes(x=Online.Security,fill=Churn.Label))+ geom_bar(posit
 ```
 
 **Customers who do not have services like Online Security have left the platform in the past month.**
+
 ---
 
 #### **Online Backup**
@@ -620,6 +622,7 @@ ggplot(joined_churn_df, aes(x=Online.Security,fill=Churn.Label))+ geom_bar(posit
 ```
 
 **Customers who do not have services like Online Backup have left the platform in the past month.**
+
 ---
 
 #### **Tech Support**
@@ -656,6 +659,7 @@ This suggests contract type affected whether someone decided to churn.
 ```
 
 **Churn percent is higher in case of cutsomers having paperless billing option**
+
 ---
 
 #### **Pament Method**
@@ -666,6 +670,7 @@ ggplot(joined_churn_df, aes(x=Payment.Method,fill=Churn.Label))+
 ```
 
 **Customers who have Electronic Check Payment Method tend to leave the platform more when compared to other options**
+
 ---
 
 #### **Satisfaction Score**
@@ -813,10 +818,11 @@ Since there is a difference in the frequency of `Senior Citizen` between the chu
 
 #### **Partner**
 ```{r}
-test_partner <- chisq.test(table(joined_churn_dfo$Churn.Label, joined_churn_dfo$Partner))
+test_partner <- chisq.test(table(joined_churn_df$Churn.Label, joined_churn_df$Partner))
 test_partner
 ```
 **p-value <2e-16, it is not independent. The two variables relate to each other**
+
 ---
 
 #### **Dependents**
@@ -842,6 +848,7 @@ chitest_os
 
 #p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
+
 ---
 
 #### **Online Backup**
@@ -855,6 +862,7 @@ chitest_ob
 
 #p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
+
 ---
 
 #### **Tech Support**
@@ -867,6 +875,7 @@ chitest_ts <- chisq.test(x3)
 chitest_ts
 #p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
+
 ---
 
 #### **Contract Type**
@@ -903,6 +912,7 @@ test2
 #p-value <2e-16, it is not independent. The two variables relate to each other.
 
 ```
+
 ---
 
 #### **Payment Method**
@@ -916,6 +926,7 @@ chitest_pm
 
 #p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
+
 ---
 
 #### **Satisfaction Score**
