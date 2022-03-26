@@ -332,7 +332,11 @@ joined_churn_df %>%
 
 ### 2.4 Checking for NA's
 
-**From Janet** -- use the Hmisc describe here?
+```{r, results='markup'}
+library(dplyr)
+glimpse(joined_churn_df)
+
+```
 
 <br>
 <br>
@@ -499,6 +503,12 @@ This suggests being a senior affected whether someone decided to churn
 
 #### **Partner**
 
+```{r}
+options(repr.plot.width = 12, repr.plot.height = 8)
+ggplot(joined_churn_df, aes(x=Partner,fill=Churn.Label))+ geom_bar(position = 'fill')
+```
+
+**Customers with Partners have lower churn rate as compared to those who don't have partners.**
 ---
 
 #### **Dependents**
@@ -514,14 +524,30 @@ This suggests being a senior affected whether someone decided to churn
 ---
 
 #### **Online Security**
+```{r}
+ggplot(joined_churn_df, aes(x=Online.Security,fill=Churn.Label))+ geom_bar(position = 'fill')+
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
 
+**Customers who do not have services like Online Security have left the platform in the past month.**
 ---
 
 #### **Online Backup**
+```{r}
+ ggplot(joined_churn_df, aes(x=Online.Backup,fill=Churn.Label))+ geom_bar(position = 'fill')+
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
 
+**Customers who do not have services like Online Backup have left the platform in the past month.**
 ---
 
 #### **Tech Support**
+```{r}
+ggplot(joined_churn_df, aes(x=Tech.Support,fill=Churn.Label))+ geom_bar(position = 'fill')+
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
+
+**Customers who do not have services like Tech Support have left the platform in the past month.**
 
 ---
 
@@ -542,11 +568,23 @@ This suggests contract type affected whether someone decided to churn
 ---
 
 #### **Paperless Billing**
+```{r}
+ ggplot(joined_churn_df, aes(x=Paperless.Billing,fill=Churn.Label))+ 
+          geom_bar(position = 'fill')+theme_bw()+
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
 
+**Churn percent is higher in case of cutsomers having paperless billing option**
 ---
 
 #### **Pament Method**
+```{r}
+ggplot(joined_churn_df, aes(x=Payment.Method,fill=Churn.Label))+
+          geom_bar(position = 'fill')+theme_bw()+
+          scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+```
 
+**Customers who have Electronic Check Payment Method tend to leave the platform more when compared to other options**
 ---
 
 #### **Satisfaction Score**
@@ -678,7 +716,11 @@ chigoodness_senior
 ---
 
 #### **Partner**
-
+```{r}
+test_partner <- chisq.test(table(joined_churn_dfo$Churn.Label, joined_churn_dfo$Partner))
+test_partner
+```
+**p-value <2e-16, it is not independent. The two variables relate to each other**
 ---
 
 #### **Dependents**
@@ -694,15 +736,41 @@ chigoodness_senior
 ---
 
 #### **Online Security**
+```{r ,results='markup'}
+x1 <- table(joined_churn_df$Churn.Label,joined_churn_df$Online.Security)
+```
 
+```{r,results='hold'}
+chitest_os <- chisq.test(x1)
+chitest_os
+
+#p-value <2e-16, it is not independent. The two variables relate to each other.
+```
 ---
 
 #### **Online Backup**
+```{r ,results='markup'}
+x2 <- table(joined_churn_df$Churn.Label,joined_churn_df$Online.Backup)
+```
 
+```{r,results='hold'}
+chitest_ob <- chisq.test(x2)
+chitest_ob
+
+#p-value <2e-16, it is not independent. The two variables relate to each other.
+```
 ---
 
 #### **Tech Support**
+```{r ,results='markup'}
+x3 <- table(joined_churn_df$Churn.Label,joined_churn_df$Tech.Support)
+```
 
+```{r,results='hold'}
+chitest_ts <- chisq.test(x3)
+chitest_ts
+#p-value <2e-16, it is not independent. The two variables relate to each other.
+```
 ---
 
 #### **Contract Type**
@@ -725,11 +793,25 @@ chigoodness_contract
 ---
 
 #### **Paperless Billing**
+```{r}
+test2 <- chisq.test(joined_churn_df(telco$Churn.Label, joined_churn_df$Paperless.Billing))
+test2
+#p-value <2e-16, it is not independent. The two variables relate to each other.
 
+```
 ---
 
 #### **Payment Method**
+```{r ,results='markup'}
+x4 <- table(joined_churn_df$Churn.Label,joined_churn_df$Payment.Method)
+```
 
+```{r,results='hold'}
+chitest_pm <- chisq.test(x4)
+chitest_pm
+
+#p-value <2e-16, it is not independent. The two variables relate to each other.
+```
 ---
 
 #### **Satisfaction Score**
