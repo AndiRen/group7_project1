@@ -369,7 +369,7 @@ filtered_joined_churn_df %>%
 
 ```
 
-Focusing in on the Churn Customers vs. Non-Churn Customers summary tables, for many categorical variables [there appears to be a difference in the frequency of churn customers who beloing to a given variable's level]{.underline}. For example, there are 1493 Churn Customers who are senior citizens and 476 who are not (~32%). For Non-Churn Customers, there are 4508 senior citizens and 666 non-seniors (~15%). While there are fewer non-senior's overall in the Churn Customer group, the percentage of seniors is higher compared to the Non-Churn group. The difference in frequency of these variable's levels will need to be analyzed.
+Focusing in on the Churn Customers vs. Non-Churn Customers summary tables, for many categorical variables [there appears to be a difference in the frequency of churn customers who beloing to a given variable's level]{.underline}. For example, there are 1493 Churn Customers who are senior citizens and 476 who are not (~24%). For Non-Churn Customers, there are 4508 senior citizens and 666 non-seniors (~13%). While there are fewer non-senior's overall in the Churn Customer group, the percentage of seniors is higher compared to the Non-Churn group. The difference in frequency of these variable's levels will need to be analyzed.
 
 Also, it should be noted that the only NA's that appear are in the `Churn.Label` and `Churn.Reason` variables. This is because only Churn Customers answered these questions. These NA values do not affect the analysis of the data set.
 
@@ -624,9 +624,8 @@ joined_churn_df %>%
 
 ```
 
-**Visually, there is no overlap in the rating given by the churn group compared to the non-churn group.**  
+**Visually, there is little overlap in the ratings given by the churn group compared to the non-churn group.**  
 This suggests the rating given affects whether someone decided to churn.  
-However, the complete lack of overlap is suspicious, or may indicate this variable needs to be considered differently.
 
 ---
 
@@ -711,22 +710,48 @@ Since we cannot say that there is a real difference in the means of the churn an
 
 #### **Senior Citizen**
 
-```{r results='markup'}
-freq_churn_senior <- only_churn %>%
+Since `Senior.Citizen` only has two levels, a chi squared, [goodness of fit]{.underline} test was used. A numerical vector of the count of senior/non-senior customers in the Churn Group was passed as the x parameter. The frequency of senior/non-senior customers in the Non-Churn Group was used as the 'expected' frequency and passed as the p parameter. Thus the hypothesis is as follows:  
+
+**NULL HYPOTHESIS:**  
+There is no difference in frequency of senior/non-senior between the Churn and Non-Churn Group.
+
+<br>
+
+*Numerical Vector, Senior/Non-Senior in [Churn Group]{.underline}*
+```{r results='markup', comment=NA}
+#Numerical vector -- Count of senior, non-senior in the Churn group
+count_churn_senior <- only_churn %>%
+  group_by(Senior.Citizen) %>%
+  summarise(count = n())
+count_churn_senior
+```
+<br>
+
+*Freq Distribution of Senior/Non-Senior in [Non-Churn Group]{.underline} (the 'expected frequency` that churn is being compared against)*
+```{r results='markdown', comment=NA}
+#Count of senior, non-senior in the non-churn group
+freq_nonchurn_senior <- no_churn %>%
   group_by(Senior.Citizen) %>%
   summarise(count = n())
 
-freq_pop_senior <- joined_churn_df %>%
-  group_by(Senior.Citizen) %>%
-  summarise(count = n())
+#Find 'expected' frequency -- i.e. freq in non-churn group
+perc_freq_senior = freq_nonchurn_senior$count/nrow(no_churn)
+perc_freq_senior
 
-perc_freq_senior = freq_pop_senior$count/nrow(joined_churn_df)
+```
+<br>
 
-chigoodness_senior = chisq.test(freq_churn_senior$count, p=perc_freq_senior)
+*Results of Chi Squared, Goodness of Fit Test*
+```{r results='markdown', comment=NA}
+#Use chi sqr test to compare 'expected' freq (freq of seniors for non-churn) with freq of seniors for churn
+#low p-value means their frequencies are different.
+chigoodness_senior = chisq.test(count_churn_senior$count, p=perc_freq_senior)
 chigoodness_senior
+
 ```
 
-**This line is added as a test**
+**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
+Since there is a difference in the frequency of `Senior Citizen` between the churn and non-churn groups, this suggests that whether a customer is a `Senior Citizen` affects whether they choose to churn or not.
 
 ---
 
@@ -760,20 +785,28 @@ chigoodness_senior
 
 #### **Contract Type**
 
+Since `Contract.Type` has more than two levels, a chi squared, [test of independence]{.underline} was used. A contingency table was created comparing Churn/Non-Churn against the levels of Contract. Then, this table was passed to the chisq.test() function to get the result of the test. Thus the hypothesis is as follows:  
+
+**NULL HYPOTHESIS:**  
+Contract Type is independent of Churn.
+
 ```{r results='markup'}
-freq_churn_contract <- only_churn %>%
-  group_by(Contract) %>%
-  summarise(count = n())
+#Create contingency table
+contable_contract = table(as.integer(joined_churn_df$Churn.Value), filtered_joined_churn_df$Contract)
+xkabledply(contable_contract, title="Contingency table for Churn Against Contract Type")
 
-freq_pop_contract <- joined_churn_df %>%
-  group_by(Contract) %>%
-  summarise(count = n())
-
-perc_freq_contract = freq_pop_contract$count/nrow(joined_churn_df)
-
-chigoodness_contract = chisq.test(freq_churn_contract$count, p=perc_freq_contract)
-chigoodness_contract
 ```
+
+*Results*
+```{r}
+#conduct independence test with contingency table
+chitest_contract = chisq.test(contable_contract)
+chitest_contract
+
+```
+
+**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
+`Churn` and `Contract Type` are not independent of one another. Thus, this suggests that the type of `Contract` a customer has affects whether they choose to churn or not.
 
 ---
 
@@ -787,25 +820,28 @@ chigoodness_contract
 
 #### **Satisfaction Score**
 
-```{r results='markup'}
-#error
-# Error in chisq.test(freq_churn_sat$count, p = perc_freq_sat) : 
-# 'x' and 'p' must have the same number of elements
-#ned to fix
+Since `Satisfaction Score` has more than two levels, a chi squared, [test of independence]{.underline} was used. A contingency table was created comparing Churn/Non-Churn against the levels of Contract. Then, this table was passed to the chisq.test() function to get the result of the test. Thus the hypothesis is as follows:  
 
-# freq_churn_sat <- only_churn %>%
-#   group_by(Satisfaction.Score) %>%
-#   summarise(count = n())
-# 
-# freq_pop_sat <- joined_churn_df %>%
-#   group_by(Satisfaction.Score) %>%
-#   summarise(count = n())
-# 
-# perc_freq_sat = freq_pop_sat$count/nrow(joined_churn_df)
-# 
-# chigoodness_sat = chisq.test(freq_churn_sat$count, p=perc_freq_sat)
-# chigoodness_sat
+**NULL HYPOTHESIS:**  
+Satisfaction Score is independent of Churn.
+
+```{r results='markup'}
+#Create contingency table
+contable_sat = table(as.integer(joined_churn_df$Churn.Value), filtered_joined_churn_df$Satisfaction.Score)
+xkabledply(contable_sat, title="Contingency table for Churn Against Satisfaction Score")
+
 ```
+
+*Results*
+```{r}
+#conduct independence test with contingency table
+chitest_sat = chisq.test(contable_sat)
+chitest_sat
+
+```
+
+**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
+`Churn` and `Satisfaction Score` are not independent of one another. Thus, this suggests that a customer's level of `Satisfaction` affects whether they choose to churn or not.
 
 ---
 
