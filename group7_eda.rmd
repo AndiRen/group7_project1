@@ -830,7 +830,7 @@ This suggests the rating given affects whether someone decided to churn.
 joined_churn_df %>%
   ggplot() +
   geom_bar(mapping=aes(x=Churn.Label, fill=as.factor(Unlimited.Data)), position = 'fill') +
-  labs(title='Frequency Unlimited Data in Churn Groupings', x=('Churn or Non-Churn'), y=('Per of Group Gave Unlimited Data')) +
+  labs(title='Frequency Unlimited Data in Churn Groupings', x=('Churn or Non-Churn'), y=('Per of Group has Unlimited Data')) +
   theme(plot.title = element_text(hjust = 0.5))
 
 ```
@@ -1129,6 +1129,29 @@ chitest_pm
 
 ---
 
+#### **Unlimited Data**
+
+```{r ,results='markup'}
+x5 <- table(joined_churn_df$Churn.Label,joined_churn_df$Unlimited.Data)
+
+  
+```
+
+```{r,results='hold'}
+chitest_pm <- chisq.test(x5)
+chitest_pm
+
+#p-value <2e-16, it is not independent. The two variables relate to each other.
+
+
+
+```
+
+**p-value <2e-16, it is not independent. The two variables relate to each other**
+
+---
+
+
 #### **Satisfaction Score**
 
 Since `Satisfaction Score` has more than two levels, a chi squared, [test of independence]{.underline} was used. A contingency table was created comparing Churn/Non-Churn against the Satisfaction Ratings. Then, this table was passed to the chisq.test() function to get the result of the test. Thus the hypothesis is as follows:  
@@ -1156,29 +1179,30 @@ chitest_sat
 
 ---
 
-#### **Unlimited Data**
-
 
 ```{r results='markup'}
 #Create contingency table
-contable_ud = table(as.integer(joined_churn_df$Churn.Value), filtered_joined_churn_df$Unlimited.Data)
-xkabledply(contable_sat, title="Contingency table for Churn Against Unlimited Data")
+#contable_ud = table(as.integer(joined_churn_df$Churn.Value), filtered_joined_churn_df$Unlimited.Data)
+#xkabledply(contable_sat, title="Contingency table for Churn Against Unlimited Data")
 
 ```
 
 ```{r, comment=NA}
 #conduct independence test with contingency table
-chitest_ud = chisq.test(contable_ud)
-chitest_ud
+#chitest_ud = chisq.test(contable_ud)
+#chitest_ud
 
 ```
 
+
+=======
 **The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
 `Churn` and `Unlimited.Data` are not independent of one another. Thus, this suggests that a customer's level of `Unlimited.Data` affects whether they choose to churn or not.
 
 ---
 
 <br>
+
 
 # 5. Conclusion
 
@@ -1212,4 +1236,9 @@ To answer this question, we divided the data into churn and non-churn groups, th
 
 **3. *Of the variables that are strong predictors of churn, which are actually providing useful information?* **  
 
+
 While these variables showed a statistical difference between the churn and non-churn groups, that does not necessarily mean that they are good for model building or tell us useful information. As we move forward with our project, we will need to think critically about contextualizing the analysis we have done here in order to select variables for our model that actually make sense in helping us answer our question about predicting whether a customer will churn. It is possible that some variables, while looking good for a model, don't logically connect to our question and may actually mask those variables more important to finding our answer. This will all be explored, evaluated, and addressed in our second project.
+
+=======
+While these variables showed a statistical difference between the churn and non-churn groups, that does not necessarily mean that they are good for model building or tell us useful information. As we move forward with our project, we will need to think critically about contextualizing the analysis we have done here in order to select variables for our model that actually make sense in helping us answer our question about predicting whether a customer will churn. It is possible that some variables, while looking good for a model, don't logically connect to our question and may actually mask those variables more important to finding our answer. This will all be explored, evaluated, and addressed in our second project.
+
