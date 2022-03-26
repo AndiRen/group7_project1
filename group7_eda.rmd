@@ -37,62 +37,15 @@ library(xtable)
 
 # 1. Intro
 
-<br>
-<br>
-
-### 1.1 Data Set Overview 
-
-The Data Set is a fictional data set provided by IBM. It provides the demographic information on the customers of a telecommunications company, data on the services each customer used, charges paid (etc.), as well as whether the customer "churned" or not -- meaning, whether the customer left the company. It also includes data on the reason(s) each customer who did leave gave for leaving. 
-
-The `churn` variable indicates whether a customer left the company in the last month. The graph below shows the percentage of churners in the data set:  
-
-**INSERT CHURN GRAPH HERE**
-
-<br>
-<br>
-
-### 1.2 SMART Questions
-
-Ultimately, the goal is to produce a model for predicting customer churn. This initial project will focus on a basic EDA of the data set in preparation of building such a model. Therefore I want to achieve 2 things:
-
-1. Which of the variables in the data set show a statistical difference between the churn and non-churn groupings?  
--This will require doing 2-sample t-tests for continuous variables, and Chi Squared tests for categorical ones.  
--If a variables passes its tests (i.e. p-value <= 0.05), that would suggest that it had a measurable effect on the decision to churn and can be used for modeling.
-
-2. Of the variables that show a statistical difference between the churn and non-churn groupings, which are strong predictors of churn?
--This will require creating model, for example, a logistical regression, and examining the adjusted r^2 value.  
--This question will be answered in Project 2
-
-3. Of the variables that are strong predictors of churn, which are actually providing useful information?
--This will require critically thinking about what the variable is actually telling us.  
--For example, it is likely that satisfaction score is more or less a corollary of churn and non-churn. Of course customers who churn are unsatisfied.  
--Therefore, even though some variable might be strong predictors, they may not be actually helping us understand churn vs. non-churn.  
--This question will be answered in Project 2
-
-<br>
-<br>
-
-### 1.3 Report Organization and Analysis Steps
-
-1. Prepare and describe data in data set  
-2. Divide into churn and non-churn groupings  
-3. Graph variables according to churn groupings to see if any obvious visual differences in the variables between churn groups  
-4. Conduct appropriate test for each variable to determine if there is a statistical difference between churn groups for each variable 
-5. Comment on results and propose next steps
-
-<br>
-<br>
-
-# 2. Description of Data
-
-<br>
-<br>
-
-### 2.1 Load data  and join data sets
-
-*Load Data Sets...*
+*Loading Data Sets...*  
+*Joining Data Sets...*  
+*Selecting Variables...*  
+*Converting Categorical Variables to Factor...*  
+*Loading Functions...*  
 
 ```{r}
+#Load data sets
+
 #Main data set
 churn_df <- data.frame(read_csv('Data Files/Telco_customer_churn.csv', col_types=cols()))
 
@@ -101,12 +54,10 @@ churn_status_df <- data.frame(read_csv('Data Files/Telco_customer_churn_status.c
 churn_services_df <- data.frame(read_csv('Data Files/Telco_customer_churn_services.csv', col_types = cols()))
 
 ```
-data set `churn_df` loaded...  
-data set `churn_status_df` loaded...  
-data set `churn_services_df` loaded...
 
-*Join Data Sets...*
 ```{r}
+#Join and filter
+
 #Filter columns to join from status_df
 status_join <- churn_status_df %>%
   select(c(Customer.ID, Satisfaction.Score, Churn.Category))
@@ -124,7 +75,39 @@ joined_churn_df <- merge(churn_df, status_join, by.x="CustomerID", by.y="Custome
 #Join service with churn
 joined_churn_df <- merge(joined_churn_df, service_join, by.x="CustomerID", by.y="Customer.ID")
 #head(joined_churn_df)
+```
 
+```{r}
+#drop unwanted columns from final df
+filtered_joined_churn_df <- joined_churn_df %>%
+  select(-c(1:10, 16, 20, 22:23, 28, 30:32))
+```
+
+
+```{r}
+#Convert categorical to factor
+cols <- c(1:3, 5:12, 14:17, 20)
+filtered_joined_churn_df[cols] <- lapply(filtered_joined_churn_df[cols], as.factor)
+
+# filtered_joined_churn_df$Senior.Citizen <- as.factor(filtered_joined_churn_df$Senior)#a
+# filtered_joined_churn_df$Partner <- as.factor(filtered_joined_churn_df$Partner)
+# filtered_joined_churn_df$Dependents <- as.factor(filtered_joined_churn_df$Dependents)#a
+# filtered_joined_churn_df$Tech.Support <- as.factor(filtered_joined_churn_df$Tech)
+# filtered_joined_churn_df$Internet.Service <- as.factor(filtered_joined_churn_df$Internet)#a
+# filtered_joined_churn_df$Online.Security <- as.factor(filtered_joined_churn_df$Online.Security)
+# filtered_joined_churn_df$Online.Backup <- as.factor(filtered_joined_churn_df$Online.Backup)
+# filtered_joined_churn_df$Paperless.Billing <- as.factor(filtered_joined_churn_df$Paperless.Billing)
+# filtered_joined_churn_df$Contract <- as.factor(filtered_joined_churn_df$Contract)#a
+# filtered_joined_churn_df$Payment.Method <- as.factor(filtered_joined_churn_df$Payment.Method)
+# filtered_joined_churn_df$Phone.Service <- as.factor(filtered_joined_churn_df$Phone.Service)
+# filtered_joined_churn_df$Churn.Label <- as.factor(filtered_joined_churn_df$Churn.Label)
+# filtered_joined_churn_df$Churn.Reason <- as.factor(filtered_joined_churn_df$Churn.Reason)
+# filtered_joined_churn_df$Churn.Category <- as.factor(filtered_joined_churn_df$Churn.Category)
+# filtered_joined_churn_df$Unlimited.Data <- as.factor(filtered_joined_churn_df$Unlimited.Data)
+
+```
+
+```{r}
 #Seperate into churn and non-churn groupings for later comparison
 only_churn <- joined_churn_df %>%
   filter(Churn.Value==1)
@@ -132,11 +115,10 @@ only_churn <- joined_churn_df %>%
 no_churn <- joined_churn_df %>%
   filter(Churn.Value==0)
 ```
-*data sets joined...*
-
-*load functions...*
 
 ```{r}
+#Functions
+
 #Create updated xkable_summary function to delete unwanted text
 xkablesum_updated <- function (df, title = "Table: Statistics summary.", digits = 4, 
           pos = "left", bso = "striped") 
@@ -197,27 +179,62 @@ ttest2sample_info <- function(test) {
 
 ```
 
-*functions loaded...*
+### 1.1 Data Set Overview 
 
-<br>
+The Data Set is a fictional data set provided by IBM. It includes the demographic information on the customers of a telecommunications company, data on the services each customer used, charges paid (etc.), as well as whether the customer "churned" or not -- meaning, whether the customer *left the company in the past month*. It also includes data on the reason(s) each customer who did leave gave for leaving. 
+
+**INSERT CHURN GRAPH:**  
 <br>
 
-### 2.2 Summary of data set structure
+### 1.2 SMART Questions
+
+Ultimately, the goal is to [produce a model for predicting customer churn]{.underline}. This initial project will focus on a basic EDA of the data set in preparation of building such a model. To Achieve this, three questions need to be aswered:
+
+**1. *Which of the variables in the data set show a statistical difference between the churn and non-churn groupings?* **  
+-This will require doing [2-sample t-tests]{.underline} for continuous variables, and [chi squared tests]{.underline} for categorical ones.  
+-If a variables passes its test (i.e. p-value <= 0.05), that would suggest that it has a measurable effect on the decision to churn and can be used for modeling.  
+--[This question will be answered in this project]{.underline}.
+
+**2. *Of the variables that show a statistical difference between the churn and non-churn groupings, which are strong predictors of churn?* **  
+-This will [require creating a model]{.underline}, for example, a logistical regression model, and examining the adjusted r^2 value.  
+-[This question will be answered in Project 2]{.underline}.
+
+**3. *Of the variables that are strong predictors of churn, which are actually providing useful information?* **  
+-This will require critically thinking about [what the variable is actually telling us]{.underline}.  
+-For example, it is likely that satisfaction score is more or less a corollary of churn and non-churn. Of course customers who churn are unsatisfied. Therefore, even though some variables may be strong predictors, they may not actually help us understand churn vs. non-churn.  
+-[This question will be answered in Project 2]{.underline}.
+<br>
+
+### 1.3 Report Organization and Analysis Steps
+
+1. Prepare and describe data in data set  
+2. Divide into churn and non-churn groupings  
+3. Graph variables according to churn groupings to see if any obvious visual differences in the variables between churn groups  
+4. Conduct appropriate test for each variable to determine if there is a statistical difference between churn groups for each variable 
+5. Comment on results and propose next steps
+<br>
+
+# 2. Description of Data
+<br>
+
+### 2.1 Summary of Data Set Structure
+<br>
+
+#### **Initial Data Set**
+
+Below is the structure of the data set before changing categorical variables to factors or dropping unwanted variables...
+
 ```{r results='markup', comment=NA}
 #Note -- comment=NA removes the ## normally printed to output before each line
 
-#drop unwanted columns from final df
-filtered_joined_churn_df <- joined_churn_df %>%
-  select(-c(1:10, 16, 20, 22:23, 28, 30:32))
-
 #display structure of unfiltered df -- so can discuss what was added and dropped
 str(joined_churn_df)
+#str(filtered_joined_churn_df)
 ```
 
-**Selecting Variables**
+#### **Selecting Variables**
 
-The initial churn data frame `(Telco_customer_churn.csv)` contained [`r ncol(churn_df)`]{.underline} variables. Another [`r ncol(service_join)-1`]{.underline} variables were added from the `Telco_customer_churn_services.csv` and  [`r ncol(status_join)-1`]{.underline} variables from the `Telco_customer_churn_status.csv` data set. Conversely, [18]{.underline} variables were dropped/not examined from the original `Telco_customer_churn.csv` data frame. The specific variables added and dropped, and the reason for doing so, follow below:
-<br>
+The initial churn data frame `(Telco_customer_churn.csv)` (structure shown above) contained [`r ncol(churn_df)`]{.underline} variables. Another [`r ncol(service_join)-1`]{.underline} variables were added from the `Telco_customer_churn_services.csv` and  [`r ncol(status_join)-1`]{.underline} variables from the `Telco_customer_churn_status.csv` data set. Conversely, [18]{.underline} variables were dropped/not examined from the original `Telco_customer_churn.csv` data frame. The specific variables added and dropped, and the reason for doing so, follow below:
 <br>
 
 **Added Variables**
@@ -261,10 +278,16 @@ All of the variables from the `Telco_customer_churn_services.csv` data set were 
 * ``r names(churn_df)[31]`` [this is ultimately what we are trying to determine!]
 * ``r names(churn_df)[32]`` [not examining profit, monthly charge more relevant for our purposes]
 
-Most of the variables that were not examined were ignored because they appeared obviously irrelevant, correlated with other variables, or did not seem to provide helpful information with respect to the questions we are trying to answer. Specifically regarding location data,  while examining location data could prove useful, it was decided to use it for follow up analysis. Part of the reason it was not chosen for the primary analysis is this data set does not contain data to dig further into what results on location analysis might mean. We don't have, for example, data on the strength of cell phone networks or availability of internet types by zip code, so it would be hard to usefully connect location data with other data and results.  
-
+Most of the variables that were not examined were ignored because [they appeared obviously irrelevant, correlated with other variables, or did not seem to provide helpful information with respect to the questions we are trying to answer]{.underline}. Specifically regarding location data,  while examining location data could prove useful, it was decided to use it for follow up analysis. Part of the reason it was not chosen for the primary analysis is this data set does not contain data to dig further into what results on location analysis might mean. We don't have, for example, data on the strength of cell phone networks or availability of internet types by zip code, so it would be hard to usefully connect location data with other data and results.  
 <br>
-The final data frame, `filtered_joined_churn_df`, consists of [`r ncol(filtered_joined_churn_df)`]{.underline} variables.
+
+#### **Final Data Set**
+
+The final data frame, `filtered_joined_churn_df`, consists of [`r ncol(filtered_joined_churn_df)`]{.underline} variables. Of these, [`r length(cols)`]{.underline} were *categorical* variables and converted into *factors*. There were [`r ncol(filtered_joined_churn_df) - length(cols)`]{.underline} *numerical* variables. The structure of the final data set is below:
+
+```{r, comment=NA}
+str(filtered_joined_churn_df)
+```
 
 **Brief Description of Final Set of Variables**
 
@@ -280,64 +303,18 @@ The final data frame, `filtered_joined_churn_df`, consists of [`r ncol(filtered_
 10. ``r names(filtered_joined_churn_df)[10]`` [type of contract (month-to-monthly, year, etc.)]
 11. ``r names(filtered_joined_churn_df)[11]`` [whether customer uses paperless billing]
 12. ``r names(filtered_joined_churn_df)[12]`` [payment method that customer uses]
-13. ``r names(filtered_joined_churn_df)[13]`` [average total monthly Charge for customer]
+13. ``r names(filtered_joined_churn_df)[13]`` [average total monthly charge for customer]
 14. ``r names(filtered_joined_churn_df)[14]`` [whether a customer did or did not churn]
 15. ``r names(filtered_joined_churn_df)[15]`` [specific reason customer gave for churning]
-16. ``r names(filtered_joined_churn_df)[16]`` [rating customer's give for their satisfaction as a customer]
-17. ``r names(filtered_joined_churn_df)[17]`` [for customer's who churned, category of reason for leaving]
+16. ``r names(filtered_joined_churn_df)[16]`` [rating customers gave for their satisfaction as a customer]
+17. ``r names(filtered_joined_churn_df)[17]`` [for customers who churned, category of reason for leaving]
 18. ``r names(filtered_joined_churn_df)[18]`` [average long-distance charges in a month]
 19. ``r names(filtered_joined_churn_df)[19]`` [avg amount of data downloaded in a month]
 20. ``r names(filtered_joined_churn_df)[20]`` [whether customer has unlimited data plan]
 21. ``r names(filtered_joined_churn_df)[21]`` [lifetime extra data charges customer has accrued]
-
-<br>
 <br>
 
-### 2.3 Summary information on final data set
-
-<br>
-<br>
-
-#### Summary Tables of Continuous variables, Divided by Churn Groupings
-
-```{r results='markup'}
-#Display summary statistics of continuous variables for entire df
-joined_churn_df %>%
-  select(c(Tenure.Months, Monthly.Charges, Avg.Monthly.Long.Distance.Charges, Total.Extra.Data.Charges, Avg.Monthly.GB.Download, Satisfaction.Score)) %>%
-  xkablesum_updated(title='Summary Statistics for Churn Data Set (ALL)')
-
-#Compare with summary statistics of continuous variables for entire customers
-joined_churn_df %>%
-  filter(Churn.Value == 1) %>%
-  select(c(Tenure.Months, Monthly.Charges, Avg.Monthly.Long.Distance.Charges, Total.Extra.Data.Charges, Avg.Monthly.GB.Download, Satisfaction.Score)) %>%
-  xkablesum_updated(title='Summary Statistics for Churn Data Set (Churn/Left)')
-
-#Compare with summary statistics of continuous variables for non-churn customers
-joined_churn_df %>%
-  filter(Churn.Value == 0) %>%
-  select(c(Tenure.Months, Monthly.Charges, Avg.Monthly.Long.Distance.Charges, Total.Extra.Data.Charges, Avg.Monthly.GB.Download, Satisfaction.Score)) %>%
-  xkablesum_updated(title='Summary Statistics for Churn Data Set (Non-Churn/Stayed)')
-
-```
-
-**Add some comments here about what is seen in the summary table**
-
-#### Summary Tables of Categorical variables, Divided by Churn Groupings
-
-**TO DO** -- or just do in one table  
--will require turning these variables into factors
-
-<br>
-<br>
-
-### 2.4 Checking for NA's
-
-**From Janet** -- use the Hmisc describe here?
-
-<br>
-<br>
-
-### 2.5 Display joined and filted data set
+### 2.2 Display Joined and Filted Data Set
 ```{r results='markup'}
 # filtered_joined_churn_df <- joined_churn_df %>%
 #   select(-c(1:10, 16, 20, 22:23, 28, 30:33))
@@ -350,18 +327,107 @@ DT::datatable(filtered_joined_churn_df,
                          fixedHeader=TRUE))
 #xkabledplyhead(joined_churn_df, title = "Churn Data Set")
 ```
+<br>
 
+### 2.3 Descriptive Statistics on Final Data Set
+<br>
+
+#### **Summary Tables of Categorical variables, Divided by Churn Groupings**
+<br>
+
+**All Customers**
+
+```{r, comment=NA}
+#Display summary statistics of categorical variables for entire df
+filtered_joined_churn_df %>%
+  select(c(cols, -Churn.Reason, -Churn.Category)) %>%
+  summary()
+
+```
+<br>
+
+**Churn Customers**
+
+```{r, comment=NA}
+#Display summary statistics of categorical variables for churn
+filtered_joined_churn_df %>%
+  filter(Churn.Label == "Yes") %>%
+  select(c(cols, -Churn.Reason, -Churn.Category)) %>%
+  summary()
+
+```
+<br>
+
+**Non-Churn Customers**
+
+```{r, comment=NA}
+#Display summary statistics of categorical variables for non-churn
+filtered_joined_churn_df %>%
+  filter(Churn.Label == "No") %>%
+  select(c(cols, -Churn.Reason, -Churn.Category)) %>%
+  summary()
+
+```
+
+Focusing in on the Churn Customers vs. Non-Churn Customers summary tables, for many categorical variables [there appears to be a difference in the frequency of churn customers who beloing to a given variable's level]{.underline}. For example, there are 1493 Churn Customers who are senior citizens and 476 who are not (~32%). For Non-Churn Customers, there are 4508 senior citizens and 666 non-seniors (~15%). While there are fewer non-senior's overall in the Churn Customer group, the percentage of seniors is higher compared to the Non-Churn group. The difference in frequency of these variable's levels will need to be analyzed.
+
+Also, it should be noted that the only NA's that appear are in the `Churn.Label` and `Churn.Reason` variables. This is because only Churn Customers answered these questions. These NA values do not affect the analysis of the data set.
+
+<br>
+<br>
+
+#### **Summary Tables of Continuous variables, Divided by Churn Groupings**
+<br>
+
+**All Customers**
+<br>
+
+```{r results='markup', comment=NA}
+#Display summary statistics of continuous variables for entire df
+joined_churn_df %>%
+  select(c(Tenure.Months, Monthly.Charges, Avg.Monthly.Long.Distance.Charges, Total.Extra.Data.Charges, Avg.Monthly.GB.Download)) %>%
+  xkablesum_updated(title='Summary Statistics for Churn Data Set (ALL)')
+
+```
+
+**Churn Customers**
+<br>
+
+```{r results='markup', comment=NA}
+#Compare with summary statistics of continuous variables for churn customers
+joined_churn_df %>%
+  filter(Churn.Value == 1) %>%
+  select(c(Tenure.Months, Monthly.Charges, Avg.Monthly.Long.Distance.Charges, Total.Extra.Data.Charges, Avg.Monthly.GB.Download)) %>%
+  xkablesum_updated(title='Summary Statistics for Churn Data Set (Churn/Left)')
+
+```
+
+**Non-Churn Customers**
+<br>
+
+```{r results='markup', comment=NA}
+#Compare with summary statistics of continuous variables for non-churn customers
+joined_churn_df %>%
+  filter(Churn.Value == 0) %>%
+  select(c(Tenure.Months, Monthly.Charges, Avg.Monthly.Long.Distance.Charges, Total.Extra.Data.Charges, Avg.Monthly.GB.Download)) %>%
+  xkablesum_updated(title='Summary Statistics for Churn Data Set (Non-Churn/Stayed)')
+
+```
+
+At first glance, [there appears to be differences between the means of the Churn and Non-Churn groupings]{.underline} for `Tenure` and `Avg. Monthly Charges`. This will need to be analyzed further. 
+<br>
+<br>
+
+### 2.4 Checking for NA's
+
+**From Janet** -- use the Hmisc describe here?
 <br>
 <br>
 
 # 3. Graph Variables for Visual Comparison
-
-<br>
 <br>
 
 ### 3.1 Continuous Variables
-
-<br>
 <br>
 
 ---
@@ -405,7 +471,7 @@ qqline(only_churn$Tenure.Months, col='#663366')
 
 ```
 
-**Visually, it looks like those who left have a different tenure profile**  
+**Visually, it looks like those who left have a different tenure profile.**  
 This can be seen in the shape of the histograms, as well as the fact that the mean lines in the boxplot of the churn and non-churn groups do not overlap with the other group's IQR. 
 
 Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.underline}.
@@ -450,7 +516,7 @@ qqnorm(only_churn$Monthly.Charges,
 qqline(only_churn$Monthly.Charges, col='#663366')
 ```
 
-**Visually, it looks like those who left have a different price profile**  
+**Visually, it looks like those who left have a different price profile.**  
 This can be seen in the shape of the histograms, while the mean lines in the boxplot of the churn and non-churn groups do overlap with the other group's IQR, they still appear to be quite different.
 
 Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.underline}.
@@ -472,11 +538,8 @@ Test text for merge example
 ---
 
 <br>
-<br>
 
 ### 3.2 Categorical Variables
-
-<br>
 <br>
 
 ---
@@ -492,8 +555,8 @@ joined_churn_df %>%
 
 ```
 
-**Visually, there appears to be more senior citizens in the churn group than the non-churn group**  
-This suggests being a senior affected whether someone decided to churn
+**Visually, there appears to be more senior citizens in the churn group than the non-churn group.**  
+This suggests being a senior affected whether someone decided to churn.
 
 ---
 
@@ -536,8 +599,8 @@ joined_churn_df %>%
 
 ```
 
-**Visually, there appears to be far more month-to-month contract customers in the churn group than the non-churn group**  
-This suggests contract type affected whether someone decided to churn
+**Visually, there appears to be far more month-to-month contract customers in the churn group than the non-churn group.**  
+This suggests contract type affected whether someone decided to churn.
 
 ---
 
@@ -561,7 +624,7 @@ joined_churn_df %>%
 
 ```
 
-**Visually, there is no overlap in the rating given by the churn group compared to the non-churn group**  
+**Visually, there is no overlap in the rating given by the churn group compared to the non-churn group.**  
 This suggests the rating given affects whether someone decided to churn.  
 However, the complete lack of overlap is suspicious, or may indicate this variable needs to be considered differently.
 
@@ -572,21 +635,18 @@ However, the complete lack of overlap is suspicious, or may indicate this variab
 ---
 
 <br>
-<br>
 
 # 4. Tests for Variables to Check for Statistical Signficance of Differences/Independence 
-
-<br>
 <br>
 
 ### 4.1 Continuous Variables -- 2-sample T-tests
 
-For each continuous variable being examined, the means of the churn and the non-churn groupings are being compared. Thus, 2-sample t-tests are used to see if the actual difference of the means between the churn groupings is 0. So, for all variables tested, the hypothesis test is:  
+For each continuous variable being examined, the means of the churn and the non-churn groupings are being compared. Thus, [2-sample t-tests]{.underline} are used to see if the actual difference of the means between the churn groups is 0. So, for all variables tested, the hypothesis test is:  
 
 **NULL HYPOTHESIS:**  
 The true difference in the means *between the `churn` and the `non-churn` group* [is 0]{.underline}.
 
-A *p-value* [<= 0.05]{.underline} will result in this null hypothesis being [rejected]{.underline} and there [being sufficient evidence]{.underline} to argue that there is a *real difference in the means* of the churn and non-churn grouping for a given variable.
+A *p-value* [<= 0.05]{.underline} will result in this null hypothesis being [rejected]{.underline} and there [being sufficient evidence]{.underline} to argue that there is a *real difference in the means* of the churn and non-churn groups for a given variable.
 <br>
 
 ---
@@ -601,8 +661,8 @@ cat("\nAndy's function's display of results\n\n")
 ttest2sample_info(ttest2sample_tenure)
 ```
 
-**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}**  
-As a result of there being a real difference in the means of the churn and non-churn groups with respective to their `Tenure`, this suggests `Tenure` affects whether a customer chooses to churn or not.  
+**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
+Since there is a real difference in the means of the churn and non-churn groups with respective to their `Tenure`, this suggests `Tenure` affects whether a customer chooses to churn or not.  
 
 ---
 
@@ -615,12 +675,8 @@ ttest2sample_info(ttest2sample_monthlyCharge)
 
 ```
 
-**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}**  
-As a result of there being a real difference in the means of the churn and non-churn groups with respective to their `Avg. Monthly Charges`, this suggests `Avg. Monthly Charges` affects whether a customer chooses to churn or not.  
-
----
-
-#### **Satisfaction Score (Move to categorical)**
+**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
+Since there is a real difference in the means of the churn and non-churn groups with respective to their `Avg. Monthly Charges`, this suggests `Avg. Monthly Charges` affects whether a customer chooses to churn or not.  
 
 ---
 
@@ -633,7 +689,7 @@ ttest2sample_info(ttest2sample_longDistance)
 
 ```
 
-**The results of the test returned a [p-value greater than 0.05]{.underline}. As a result, we [do not reject the Null Hypothesis]{.underline}**  
+**The results of the test returned a [p-value greater than 0.05]{.underline}. As a result, we [do not reject the Null Hypothesis]{.underline}.**  
 Since we cannot say that there is a real difference in the means of the churn and non-churn groups with respective to their `Avg. Monthly Long Distance Charges`, this suggests `Avg. Monthly Long Distance Charges` does not affect whether a customer chooses to churn or not.  
 
 ---
@@ -647,11 +703,8 @@ Since we cannot say that there is a real difference in the means of the churn an
 ---
 
 <br>
-<br>
 
 ### 4.2 Categorical Variables -- Goodness of Fit and Test of Independence
-
-<br>
 <br>
 
 ---
