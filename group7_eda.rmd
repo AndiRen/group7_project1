@@ -575,8 +575,6 @@ Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.
 
 #### **Avg. Monthly GB Download**
 
-
-
 ```{r}
 #Histograms
 joined_churn_df %>%
@@ -604,7 +602,6 @@ qqnorm(only_churn$Avg.Monthly.GB.Download,
 qqline(only_churn$Avg.Monthly.GB.Download, col='#663366')
 ```
 
-
 **Visually, it looks like those who left have a different Avg monthly gb downloaded profile.**  
 This can be seen in the shape of the histograms.
 
@@ -613,7 +610,6 @@ Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.
 ---
 
 #### **Total Extra Data Charges**
-
 
 ```{r}
 #Histograms
@@ -642,14 +638,12 @@ qqnorm(only_churn$Total.Extra.Data.Charges,
 qqline(only_churn$Total.Extra.Data.Charges, col='#663366')
 ```
 
-
 **Visually, it looks like those who left have a different Total Extra Data Charges profile.**  
 This can be seen in the shape of the histograms.
 
 Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.underline}.
 
 ---
-
 
 <br>
 
@@ -716,6 +710,8 @@ This suggests being having a phone service not affected whether someone decided 
 options(repr.plot.width = 12, repr.plot.height = 8)
 ggplot(joined_churn_df, aes(x=Internet.Service,fill=Churn.Label))+ geom_bar(position = 'fill')
 ```
+
+
 **Visually, there appears to be more profiles having fiber optics in the churn group than the non-churn group.**  
 This suggests being a Internet services affected whether someone decided to churn.
 
@@ -763,6 +759,7 @@ joined_churn_df %>%
 ```
 
 **Visually, there appears to be far more month-to-month contract customers in the churn group than the non-churn group.**  
+
 This suggests contract type affected whether someone decided to churn.
 
 ---
@@ -817,6 +814,10 @@ joined_churn_df %>%
   theme(plot.title = element_text(hjust = 0.5))
 
 ```
+
+**Visually, those who have unlimited data churned morethan those who have not **  
+
+This suggests the frequency of unlimited data affects whether someone decided to churn.
 
 ---
 
@@ -991,7 +992,7 @@ test_PS <- chisq.test(table(joined_churn_df$Churn.Label, joined_churn_df$Phone.S
 test_PS
 ```
 
-**p-value = .03, it is  independent. The two variables did not relate to each other**
+**p-value = .03, it is independent. The two variables did not relate to each other**
 
 ---
 
