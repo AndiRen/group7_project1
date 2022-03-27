@@ -1016,14 +1016,13 @@ test_PS
 
 ---
 
-#### **Internet Service**
+
 
 ```{r, comment=NA}
-test_IS <- chisq.test(table(joined_churn_df$Churn.Label, joined_churn_df$Internet.Service))
-test_IS
+#test_IS <- chisq.test(table(joined_churn_df$Churn.Label, joined_churn_df$Internet.Service))
+#test_IS
 ```
 
-**p-value <2e-16, it is not independent. The two variables relate to each other**
 
 ---
 
@@ -1176,6 +1175,33 @@ chitest_sat
 
 **The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
 `Churn` and `Satisfaction Score` are not independent of one another. Thus, this suggests that a customer's level of `Satisfaction` affects whether they choose to churn or not.
+
+---
+
+#### **Internet Services**
+
+Since `Internet Services` has more than two levels, a chi squared, [test of independence]{.underline} was used. A contingency table was created comparing Churn/Non-Churn against the Satisfaction Ratings. Then, this table was passed to the chisq.test() function to get the result of the test. Thus the hypothesis is as follows:  
+
+**NULL HYPOTHESIS:**  
+Internet Services is independent of Churn.
+
+```{r results='markup'}
+#Create contingency table
+contable_IS = table(as.integer(joined_churn_df$Churn.Value), filtered_joined_churn_df$Internet.Service)
+xkabledply(contable_IS, title="Contingency table for Churn Against Internet Service")
+
+```
+
+*Results*
+```{r, comment=NA}
+#conduct independence test with contingency table
+chitest_IS = chisq.test(contable_sat)
+chitest_IS
+
+```
+
+**The results of the test returned a [p-value less than 0.05]{.underline}. As a result, we [reject the Null Hypothesis]{.underline}.**  
+`Churn` and `Internet Service` are not independent of one another. Thus, this suggests that a customer's level of `Internet Service` affects whether they choose to churn or not.
 
 ---
 
