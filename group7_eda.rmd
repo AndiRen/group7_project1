@@ -185,7 +185,9 @@ ttest2sample_info <- function(test) {
 
 This data set is a fictional data set provided by IBM. It includes the demographic information on the customers of a telecommunications company, data on the services each customer used, charges paid (etc.), as well as whether the customer "churned" or not -- meaning, whether the customer *left the company in the past month*. It also includes data on the reason(s) each customer who did leave gave for leaving.
 
-**From the graph below, we see that around 26% of customer left the platform within the last month.**
+---
+
+**From the graph below, we see that around 27% of customer left the platform within the last month.**
 
 ```{r}
 options(repr.plot.width = 6, repr.plot.height = 4)
@@ -201,16 +203,34 @@ xlab("Churn") +
 ylab("Percent")+
 ggtitle("Churn Percent")
 ```
- 
+
+---
+
+**The graph below details the reasons customers gave for leaving**.  
+Although some customers may have selected the same *reason* for leaving, they may have *categorized* how they associated that reason differently. The churn category is used as a fill to provide further detail in understanding the customer perspective.  
+We will use these reasons to help us formulate our questions, select appropriate variables to investigate, and contextualize the results:
+
+```{r}
+joined_churn_df %>%
+  filter(!is.na(Churn.Category)) %>%
+  ggplot() +
+  geom_bar(mapping=aes(y=Churn.Reason, fill=Churn.Category), show.legend=TRUE) +
+  labs(title='Reasons for Leaving by Answer', y=('Reason'), x=('Count')) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+---
+
 <br>
 
 ### 1.2 SMART Questions
 
-Ultimately, the goal is to [produce a model for predicting customer churn]{.underline}. This initial project will focus on a basic EDA of the data set in preparation of building such a model. To Achieve this, three questions need to be aswered:
+Ultimately, the goal is to [produce a model for predicting customer churn]{.underline}. This initial project will focus on a basic EDA of the data set in preparation for building such a model. To Achieve this, three questions need to be aswered:
 
 **1. *Which of the variables in the data set show a statistical difference between the churn and non-churn groupings?* **  
 -This will require doing [2-sample t-tests]{.underline} for continuous variables, and [chi squared tests]{.underline} for categorical ones.  
--If a variables passes its test (i.e. p-value <= 0.05), that would suggest that it has a measurable effect on the decision to churn and can be used for modeling.  
+-If a variable passes its test (i.e. p-value <= 0.05), that would suggest that there is a difference between the churn and non-churn groups with respect to that variable, and thus it likely has a measurable effect on the decision to churn, suggesting the variable could be used for modeling.  
 --[This question will be answered in this project]{.underline}.
 
 **2. *Of the variables that show a statistical difference between the churn and non-churn groupings, which are strong predictors of churn?* **  
@@ -225,11 +245,12 @@ Ultimately, the goal is to [produce a model for predicting customer churn]{.unde
 
 ### 1.3 Report Organization and Analysis Steps
 
-1. Prepare and describe data in data set  
-2. Divide into churn and non-churn groupings  
-3. Graph variables according to churn groupings to see if any obvious visual differences in the variables between churn groups  
-4. Conduct appropriate test for each variable to determine if there is a statistical difference between churn groups for each variable
-5. Comment on results and propose next steps
+1. Prepare and describe variables in data set  
+2. Divide into churn and non-churn groupings 
+3. Examine descriptive statistics of the variables
+4. Graph variables according to churn groupings to see if there are any obvious visual differences in the variables between churn groups  
+5. Conduct the appropriate test for each variable to determine if there is a statistical difference between churn groups for each variable
+6. Comment on the results of the analysis and propose next steps
 <br>
 
 # 2. Description of Data
@@ -262,7 +283,7 @@ The initial churn data frame `(Telco_customer_churn.csv)` (structure shown above
 * ``r names(status_join)[2]``
 * ``r names(status_join)[3]``
 
-``r names(status_join)[2]`` was added because it matched reasons customer's gave for choosing to churn. Additionally the variable ``r names(status_join)[3]`` was added to allow for more nuanced examination of the reasons customers gave for choosing to churn. Beyond selecting more variables to use in the investigation, knowing the specific reasons customers gave for leaving the company will be useful to compare against the results of the statistical analysis, in order to better understand and contextualize those results.
+``r names(status_join)[2]`` was added because it matched reasons customer's gave for choosing to churn. Additionally the variable ``r names(status_join)[3]`` was added to allow for a more nuanced examination of the reasons customers gave for choosing to churn. Beyond selecting more variables to use in the investigation, knowing the specific reasons customers gave for leaving the company will be useful to compare against the results of the statistical analysis, in order to better understand and contextualize those results.
 
 *From `Telco_customer_churn_services.csv`*
 
@@ -301,7 +322,7 @@ Most of the variables that were not examined were ignored because [they appeared
 
 #### **Final Data Set**
 
-The final data frame, `filtered_joined_churn_df`, consists of [`r ncol(filtered_joined_churn_df)`]{.underline} variables. Of these, [`r length(cols)`]{.underline} were *categorical* variables and converted into *factors*. There were [`r ncol(filtered_joined_churn_df) - length(cols)`]{.underline} *numerical* variables. The structure of the final data set is below:
+The final data frame, `filtered_joined_churn_df`, consists of [`r ncol(filtered_joined_churn_df)`]{.underline} variables. Of these, [`r length(cols)`]{.underline} were *categorical* variables and converted into *factors*. There were [`r ncol(filtered_joined_churn_df) - length(cols)`]{.underline} *numerical* variables. Two of the variables, `Churn.Reason` and `Churn.Caegory` and included to help contextualize data and will not be analyzed. The variable `Churn.Label` is used to divide groups into churn and non-churn and will not itself be analyzed. Thus, there will be a total of [18]{.underline} variables that are analyzed in this EDA. The structure of the final data set is below:
 
 ```{r, comment=NA}
 str(filtered_joined_churn_df)
@@ -387,7 +408,7 @@ filtered_joined_churn_df %>%
 
 ```
 
-Focusing in on the Churn Customers vs. Non-Churn Customers summary tables, for many categorical variables [there appears to be a difference in the frequency of churn customers who beloing to a given variable's level]{.underline}. For example, there are 1493 Churn Customers who are senior citizens and 476 who are not (~24%). For Non-Churn Customers, there are 4508 senior citizens and 666 non-seniors (~13%). While there are fewer non-senior's overall in the Churn Customer group, the percentage of seniors is higher compared to the Non-Churn group. The difference in frequency of these variables' levels will need to be analyzed.
+Focusing in on the Churn Customers vs. Non-Churn Customers summary tables, for many categorical variables [there appears to be a difference in the frequency of churn customers who belong to a given variable's level]{.underline}. For example, there are 1493 Churn Customers who are senior citizens and 476 who are not (~24%). For Non-Churn Customers, there are 4508 senior citizens and 666 non-seniors (~13%). While there are fewer non-seniors overall in the Churn Customer group, the percentage of seniors is higher compared to the Non-Churn group. The difference in frequency of each of these variable's levels will need to be analyzed.
 
 <br>
 <br>
@@ -438,7 +459,7 @@ At first glance, [there appears to be differences between the means of the Churn
 
 From library `Hmisc`, using the `describe()` function
 
-```{r, results='markup'}
+```{r, results='markup', comment=NA}
 
 describe(filtered_joined_churn_df)
 
@@ -658,7 +679,7 @@ qqnorm(only_churn$Total.Extra.Data.Charges,
 qqline(only_churn$Total.Extra.Data.Charges, col='#663366')
 ```
 
-**Visually, it looks like those who left have a different Total Extra Data Charges profile.**  
+**Visually, it looks like those who left do not have a different Total Extra Data Charges profile.**  
 This can be seen in the shape of the histograms.
 
 Also -- the histogram and qq plot show a [clear lack of a normal distribution]{.underline}.
@@ -819,7 +840,7 @@ joined_churn_df %>%
 ```
 
 **Visually, there is little overlap in the ratings given by the churn group compared to the non-churn group.**  
-This suggests the rating given affects whether someone decided to churn.  
+This suggests that the rating given by customers affects whether someone decided to churn.  
 
 ---
 
@@ -896,7 +917,7 @@ ttest2sample_info(ttest2sample_longDistance)
 
 ```
 
-**The results of the test returned a [p-value greater than 0.05]{.underline}. As a result, we [do not reject the Null Hypothesis]{.underline}.**  
+**The results of the test returned a [p-value greater than 0.05]{.underline}. As a result, we [accept the Null Hypothesis]{.underline}.**  
 Since we cannot say that there is a real difference in the means of the churn and non-churn groups with respect to their `Avg. Monthly Long Distance Charges`, this suggests `Avg. Monthly Long Distance Charges` does not affect whether a customer chooses to churn or not.  
 
 ---
@@ -1180,7 +1201,7 @@ chitest_sat
 
 #### **Internet Services**
 
-Since `Internet Services` has more than two levels, a chi squared, [test of independence]{.underline} was used. A contingency table was created comparing Churn/Non-Churn against the Satisfaction Ratings. Then, this table was passed to the chisq.test() function to get the result of the test. Thus the hypothesis is as follows:  
+Since `Internet Services` has more than two levels, a chi squared, [test of independence]{.underline} was used. A contingency table was created comparing Churn/Non-Churn against the different types of Internet Services. Then, this table was passed to the chisq.test() function to get the result of the test. Thus the hypothesis is as follows:  
 
 **NULL HYPOTHESIS:**  
 Internet Services is independent of Churn.
@@ -1204,22 +1225,6 @@ chitest_IS
 `Churn` and `Internet Service` are not independent of one another. Thus, this suggests that a customer's level of `Internet Service` affects whether they choose to churn or not.
 
 ---
-
-
-```{r results='markup'}
-#Create contingency table
-#contable_ud = table(as.integer(joined_churn_df$Churn.Value), filtered_joined_churn_df$Unlimited.Data)
-#xkabledply(contable_sat, title="Contingency table for Churn Against Unlimited Data")
-
-```
-
-```{r, comment=NA}
-#conduct independence test with contingency table
-#chitest_ud = chisq.test(contable_ud)
-#chitest_ud
-
-```
-
 
 # 5. Conclusion
 
@@ -1249,9 +1254,21 @@ To answer this question, we divided the data into churn and non-churn groups, th
 
 ### 5.2 Looking Foward to Model Building and Ansering SMART Questions 2 & 3
 
+As we move into Project 2, we will need to critically examine the 15 variables that passed our tests to see if they help us build a model to predict the likelihood of a customer churning. We will be answering the following questions:
+
+---
+
 **2. *Of the variables that show a statistical difference between the churn and non-churn groupings, which are strong predictors of churn?* **
 
 **3. *Of the variables that are strong predictors of churn, which are actually providing useful information?* **  
 
+---
 
-While these variables showed a statistical difference between the churn and non-churn groups, that does not necessarily mean that they are good for model building or tell us useful information. As we move forward with our project, we will need to think critically about contextualizing the analysis we have done here in order to select variables for our model that actually make sense in helping us answer our question about predicting whether a customer will churn. It is possible that some variables, while looking good for a model, don't logically connect to our question and may actually mask those variables more important to finding our answer. This will all be explored, evaluated, and addressed in our second project.
+While these variables showed a statistical difference between the churn and non-churn groups, that does not necessarily mean that they are good for model building or tell us useful information. As we move forward with our project, we will need to contextualize the analysis we have done here in order to select variables for our model that actually make sense in helping us answer our question about predicting whether a customer will churn. It is possible that some variables, while looking good for a model, don't logically connect to our question and may actually mask those variables more important to finding our answer. This will all be explored, evaluated, and addressed in our second project.
+<br>
+
+# 6. References
+
+Chang, Jack. (2020). *Telco customer churn (11.1.3+)* [Data Set]. Kaggle. https://www.kaggle.com/datasets/ylchang/telco-customer-churn-1113
+
+Samples Team. (2019, July 11). *Telco customer churn (11.1.3+)*. IBM. https://community.ibm.com/community/user/businessanalytics/blogs/steven-macko/2019/07/11/telco-customer-churn-1113
