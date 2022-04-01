@@ -1267,6 +1267,9 @@ As we move into Project 2, we will need to critically examine the 15 variables t
 While these variables showed a statistical difference between the churn and non-churn groups, that does not necessarily mean that they are good for model building or tell us useful information. As we move forward with our project, we will need to contextualize the analysis we have done here in order to select variables for our model that actually make sense in helping us answer our question about predicting whether a customer will churn. It is possible that some variables, while looking good for a model, don't logically connect to our question and may actually mask those variables more important to finding our answer. This will all be explored, evaluated, and addressed in our second project.
 <br>
 
+For example, from the earlier analysis on Techsupport, online backup and online security. Customers who do not have service like online backup, online security and tech support have higher churn rate as compared to other options. This make a intuitive sense that customers are not willing to stay with a telecom platform that have poor performance on customer support system. Therefore, I assume these three variables have some capability to predict some part of target value. 
+
+
 # 6. References
 
 Chang, Jack. (2020). *Telco customer churn (11.1.3+)* [Data Set]. Kaggle. https://www.kaggle.com/datasets/ylchang/telco-customer-churn-1113
