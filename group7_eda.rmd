@@ -716,7 +716,7 @@ options(repr.plot.width = 12, repr.plot.height = 8)
 ggplot(joined_churn_df, aes(x=Partner,fill=Churn.Label))+ geom_bar(position = 'fill')
 ```
 
-**Customers with Partners have lower churn rate as compared to those who don't have partners.**
+**This plot shows customers with Partners have lower churn rate as compared to those who don't have partners.And This indicated that whether have partner or not could affect customers make decision on whether to churn or not churn**
 
 ---
 
@@ -764,7 +764,7 @@ ggplot(joined_churn_df, aes(x=Online.Security,fill=Churn.Label))+ geom_bar(posit
           scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 ```
 
-**Customers who do not have services like Online Security have left the platform in the past month.**
+**This plot represents customers who do not have services like Online Security have left the platfom as conpared to other options.And This indicated that the option of Online Security could affect customers make decision on whether to churn or not churn**
 
 ---
 
@@ -774,7 +774,7 @@ ggplot(joined_churn_df, aes(x=Online.Security,fill=Churn.Label))+ geom_bar(posit
           scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 ```
 
-**Customers who do not have services like Online Backup have left the platform in the past month.**
+**The graph shows customers who do not have services like Online Backup have left the platform. And This indicated that the option of Online Backup could affect customers make decision on whether to churn or not churn**
 
 ---
 
@@ -784,7 +784,7 @@ ggplot(joined_churn_df, aes(x=Tech.Support,fill=Churn.Label))+ geom_bar(position
           scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 ```
 
-**Customers who do not have services like Tech Support have left the platform in the past month.**
+**The plot shows customers who do not have services like Tech Support have left the platform in the past month.And This indicated that the option of Tech Support could affect customers make decision on whether to churn or not churn**
 
 ---
 
@@ -812,18 +812,18 @@ This suggests contract type affected whether someone decided to churn.
           scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 ```
 
-**Churn percent is higher in case of cutsomers having paperless billing option**
+**The plot represents that churn percent is higher in case of customers having paperless billing option. And This indicated that the option of Paperless Billing could affect customers make decision on whether to churn or not churn**
 
 ---
 
-#### **Pament Method**
+#### **Payment Method**
 ```{r}
 ggplot(joined_churn_df, aes(x=Payment.Method,fill=Churn.Label))+
           geom_bar(position = 'fill')+theme_bw()+
           scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 ```
 
-**Customers who have Electronic Check Payment Method tend to leave the platform more when compared to other options**
+**The plot represents that customers who have Electronic Check Payment Method tend to leave the platform more when compared to other options. And This indicated that the option of payment method could affect customers make decision on whether to churn or not churn**
 
 ---
 
@@ -1011,7 +1011,7 @@ test_partner <- chisq.test(table(joined_churn_df$Churn.Label, joined_churn_df$Pa
 test_partner
 ```
 
-**p-value <2e-16, it is not independent. The two variables relate to each other**
+**p-value <2e-16, it is not independent. The two variables relate to each other this indicate that whether have partner or not relate to customers make decision on whether to churn or not churn**
 
 ---
 
@@ -1059,7 +1059,7 @@ chitest_os
 #p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
 
-**p-value <2e-16, it is not independent. The two variables relate to each other.**
+**p-value <2e-16, it is not independent. The two variables relate to each other this indicate that the option of online security relate to customers make decision on whether to churn or not churn**
 
 ---
 
@@ -1075,7 +1075,7 @@ chitest_ob
 #p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
 
-**p-value <2e-16, it is not independent. The two variables relate to each other.**
+**p-value <2e-16, it is not independent. The two variables relate to each other this indicate that the option of online backup relate to customers make decision on whether to churn or not churn**
 
 ---
 
@@ -1090,7 +1090,7 @@ chitest_ts
 #p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
 
-**p-value <2e-16, it is not independent. The two variables relate to each other.**
+**p-value <2e-16, it is not independent. The two variables relate to each other this indicate that the option of tech support relate to customers make decision on whether to churn or not churn**
 
 ---
 
@@ -1129,7 +1129,7 @@ test2
 
 ```
 
-**p-value <2e-16, it is not independent. The two variables relate to each other.**
+**p-value <2e-16, it is not independent. The two variables relate to each other  this indicate that the option of paperless billing relate to customers make decision on whether to churn or not churn**
 
 ---
 
@@ -1145,7 +1145,7 @@ chitest_pm
 #p-value <2e-16, it is not independent. The two variables relate to each other.
 ```
 
-**p-value <2e-16, it is not independent. The two variables relate to each other.**
+**p-value <2e-16, it is not independent. The two variables relate to each other this indicate that the option of payment method relate to customers make decision on whether to churn or not churn**
 
 ---
 
@@ -1268,7 +1268,7 @@ While these variables showed a statistical difference between the churn and non-
 <br>
 
 For example, from the earlier analysis on Techsupport, online backup and online security. Customers who do not have service like online backup, online security and tech support have higher churn rate as compared to other options. This make a intuitive sense that customers are not willing to stay with a telecom platform that have poor performance on customer support system. Therefore, I assume these three variables have some capability to predict some part of target value. 
-
+<br>
 
 # 6. References
 
