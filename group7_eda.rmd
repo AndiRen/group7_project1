@@ -191,15 +191,15 @@ This data set is a fictional data set provided by IBM. It includes the demograph
 
 ```{r}
 options(repr.plot.width = 6, repr.plot.height = 4)
-filtered_joined_churn_df %>% 
-group_by(Churn.Label) %>% 
-summarise(Count = n())%>% 
+filtered_joined_churn_df %>%
+group_by(Churn.Label) %>%
+summarise(Count = n())%>%
 mutate(percent = prop.table(Count)*100)%>%
 ggplot(aes(reorder(Churn.Label, -percent), percent), fill = Churn)+
 geom_col(fill = c("#FC4E07", "#E7B800"))+
-geom_text(aes(label = sprintf("%.2f%%", percent)), hjust = 0.01,vjust = -0.5, size =3)+ 
+geom_text(aes(label = sprintf("%.2f%%", percent)), hjust = 0.01,vjust = -0.5, size =3)+
 theme_bw()+  
-xlab("Churn") + 
+xlab("Churn") +
 ylab("Percent")+
 ggtitle("Churn Percent")
 ```
@@ -246,7 +246,7 @@ Ultimately, the goal is to [produce a model for predicting customer churn]{.unde
 ### 1.3 Report Organization and Analysis Steps
 
 1. Prepare and describe variables in data set  
-2. Divide into churn and non-churn groupings 
+2. Divide into churn and non-churn groupings
 3. Examine descriptive statistics of the variables
 4. Graph variables according to churn groupings to see if there are any obvious visual differences in the variables between churn groups  
 5. Conduct the appropriate test for each variable to determine if there is a statistical difference between churn groups for each variable
@@ -1154,7 +1154,7 @@ chitest_pm
 ```{r ,results='markup'}
 x5 <- table(joined_churn_df$Churn.Label,joined_churn_df$Unlimited.Data)
 
-  
+
 ```
 
 ```{r,results='hold'}
@@ -1266,6 +1266,9 @@ As we move into Project 2, we will need to critically examine the 15 variables t
 
 While these variables showed a statistical difference between the churn and non-churn groups, that does not necessarily mean that they are good for model building or tell us useful information. As we move forward with our project, we will need to contextualize the analysis we have done here in order to select variables for our model that actually make sense in helping us answer our question about predicting whether a customer will churn. It is possible that some variables, while looking good for a model, don't logically connect to our question and may actually mask those variables more important to finding our answer. This will all be explored, evaluated, and addressed in our second project.
 <br>
+
+For example, from the earlier analysis on Techsupport, online backup and online security. Customers who do not have service like online backup, online security and tech support have higher churn rate as compared to other options. This make a intuitive sense that customers are not willing to stay with a telecom platform that have poor performance on customer support system. Therefore, I assume these three variables have some capability to predict some part of target value. 
+
 
 # 6. References
 
