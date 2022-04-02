@@ -1268,6 +1268,18 @@ While these variables showed a statistical difference between the churn and non-
 <br>
 
 For example, from the earlier analysis on Techsupport, online backup and online security. Customers who do not have service like online backup, online security and tech support have higher churn rate as compared to other options. This make a intuitive sense that customers are not willing to stay with a telecom platform that have poor performance on customer support system. Therefore, I assume these three variables have some capability to predict some part of target value. 
+
+
+another example being ,The customers who have a dependency has a very low churn rate than customers who have no dependency.
+The low p value from the chi sq test also confirm variable dependants has an weightage on deciding people to stay or leave
+Apart from the statistical analysis, this can be explained as :
+
+1. If a customer who has dependency need to leave , everyone in the dependency should have to leave all together ,which is more complicated than customer who has no dependants , and who can easily leave the service.
+
+2. Also the service provider may be providing a better plan for customer who has dependants, than their other service competitors.
+
+
+
 <br>
 
 # 6. References
