@@ -452,6 +452,22 @@ joined_churn_df %>%
 ```
 
 At first glance, [there appears to be differences between the means of the Churn and Non-Churn groupings]{.underline} for `Tenure` and `Avg. Monthly Charges`. This will need to be analyzed further.
+
+These are the variable which are in this data set - tenure months, monthly charges, avg monthly  long distance , total extra , avg monthly  download .
+
+Here we have created two table for churn and non-churn containing min q1 median man q3 and max.
+
+One important point to be noted from these tables is for the monthly charges, avg monthly long distance charges avg monthly gb downloaded the mean and median are almost equal or close in both churn and non-churn group. 
+
+From this we can infer that the graphs for these variables are symmetric.
+
+Also, from these tables, we can observe that the mean and median for tenure and average monthly charges are different for churn and non-churn group. From this we can infer that the factors tenure and average monthly charges has a weight over the decision of customers in deciding whether to churn or not.
+
+The point here to be noted here that, these are some few bits of information including mean, median, max, min, and we cannot solely infer conclusion on the basis on this few information alone, but as an initial step we can take these inferences and the subsequent statistical analysis and test are explained in the upcoming slides.
+
+
+
+
 <br>
 <br>
 
