@@ -1,0 +1,110 @@
+---
+title: "Final_project6101"
+author: "Jane"
+date: "4/16/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Load Package
+```{r}
+library(DT)
+library(tidyverse)
+library(ezids)
+library(knitr)
+library(kableExtra)
+library(xtable)
+library(Hmisc)
+# The package "ezids" (EZ Intro to Data Science) includes a lot of the helper functions we developed for the course. 
+# Some of the frequently used functions are loadPkg(), xkabledply(), xkablesummary(), uzscale(), etc.
+library(ezids)
+ 
+# some of common options (and the defaults) are: 
+# include=T, eval=T, echo=T, results='hide'/'asis'/'markup',..., collapse=F, warning=T, message=T, error=T, cache=T, fig.width=6, fig.height=4, fig.dim=c(6,4) #inches, fig.align='left'/'center','right', 
+# knitr::opts_chunk$set(warning = F, results = "markup", message = F)
+knitr::opts_chunk$set(warning = F, results = "hide", message = F)
+options(scientific=T, digits = 3) 
+# options(scipen=9, digits = 3) 
+# ‘scipen’: integer. A penalty to be applied when deciding to print numeric values in fixed or exponential notation.  Positive values bias towards fixed and negative towards scientific notation: fixed notation will be preferred unless it is more than ‘scipen’ digits wider.
+# use scipen=999 to prevent scientific notation at all times
+
+```
+
+```{r}
+loadPkg("ggplot2")
+```
+
+# Featue Selection
+
+From the EDA, features we've found out will be useful:
+
+Categorical: 
+Partner 
+Tech.Support 
+Online.Security 
+Online.Backup 
+Paperless.Billing 
+Payment.Method 
+Senior Citizen
+Contract Type
+Satisfaction Score
+Dependents
+
+Continuous:
+Tenure
+Avg. Monthly Charges
+
+??? do we need have plots here as brief explanations as well as the rationale of the EDA and models??
+
+
+# Model Selection
+
+??? do we need to use model selection technique that we learned from class( like exhaustive test.etc) to determin model?
+??? but  since the target variable has binary classifiers so Logistic reg
+
+## 1. Logistic Reg
+
+load data:
+```{r}
+tg <- data.frame(read.csv("~/GitHub/group7_project1/Data Files/Telco_customer_churn.csv")) 
+head(tg)
+xkablesummary(tg)
+
+```
+
+Categorical Variable
+
+```{r}
+tg$Churn.Value<- factor(tg$Churn.Value)
+tg$Paperless.Billing <- factor(tg$Paperless.Billing)
+tg$Payment.Method <- factor(tg$Payment.Method)
+tg$Tech.Support <- factor(tg$Tech.Support)
+tg$Online.Backup <- factor(tg$Online.Backup)
+tg$Contract <- factor(tg$Contract)
+tg$Internet.Service <- factor(tg$Internet.Service)
+tg$Partner <- factor(tg$Partner)
+tg$Dependents <- factor(tg$Dependents)
+tg$Senior.Citizen <- factor(tg$Senior.Citizen)
+```
+
+```{r}
+
+tgLogit <- glm(Churn.Value ~ Paperless.Billing+Payment.Method+Tech.Support+Online.Backup+Contract+Internet.Service+Partner+Senior.Citizen+Dependents , data = tg, family = "binomial")
+```
+
+```{r}
+xkabledply(tgLogit, title = paste("Logistic Regression :", format(formula(tgLogit)) ))
+```
+
+
+```{r}
+summary(tgLogit)
+```
+
+
+
+## Model Evaluation and comparsion
