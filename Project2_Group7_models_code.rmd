@@ -1,0 +1,443 @@
+---
+title: "Group 7 Project 2: Models"
+author: "Andy Christian, Yaxin (Janet) Zhuang, Adhithya Kiran"
+date: "4/20/2022"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = F, message = F)
+options(scientific=T, digits = 3)
+
+#install packages
+#install.packages("DT")
+#install.packages("tidyverse")
+#install.packages("ezids")
+#install.packages("knitr")
+#install.packages("kableExtra")
+#install.packages("xtable")
+#install.packages('Hmisc')
+
+#load packages
+library(DT)
+library(tidyverse)
+library(ezids)
+library(knitr)
+library(kableExtra)
+library(xtable)
+library(Hmisc)
+library(regclass)
+library(pROC)
+library(pscl)
+```
+
+
+```{r}
+#Load data sets
+
+#Main data set
+churn_df <- data.frame(read_csv('Data Files/Telco_customer_churn.csv', col_types=cols()))
+
+#additional data sets
+churn_status_df <- data.frame(read_csv('Data Files/Telco_customer_churn_status.csv', col_types = cols()))
+churn_services_df <- data.frame(read_csv('Data Files/Telco_customer_churn_services.csv', col_types = cols()))
+
+##################################################
+
+#Join and filter
+
+#Filter columns to join from status_df
+status_join <- churn_status_df %>%
+  select(c(Customer.ID, Satisfaction.Score, Churn.Category))
+#status_join
+
+#Filer columns to join from services)df
+service_join <- churn_services_df %>%
+  select(c(Customer.ID, Avg.Monthly.Long.Distance.Charges, Avg.Monthly.GB.Download, Unlimited.Data, Total.Extra.Data.Charges))
+#service_join
+
+#Join status with churn
+joined_churn_df <- merge(churn_df, status_join, by.x="CustomerID", by.y="Customer.ID")
+#head(joined_churn_df)
+
+#Join service with churn
+joined_churn_df <- merge(joined_churn_df, service_join, by.x="CustomerID", by.y="Customer.ID")
+#head(joined_churn_df)
+
+##################################################
+
+#drop unwanted columns from final df
+filtered_joined_churn_df <- joined_churn_df %>%
+  select(-c(1:10, 16, 20, 22:23, 28, 30:32))
+
+##################################################
+
+#Convert categorical to factor
+cols <- c(1:3, 5:12, 14:17, 20)
+filtered_joined_churn_df[cols] <- lapply(filtered_joined_churn_df[cols], as.factor)
+
+##################################################
+
+#Seperate into churn and non-churn groupings for later comparison
+only_churn <- joined_churn_df %>%
+  filter(Churn.Value==1)
+
+no_churn <- joined_churn_df %>%
+  filter(Churn.Value==0)
+
+##################################################
+
+#Functions
+
+#Create updated xkable_summary function to delete unwanted text
+xkablesum_updated <- function (df, title = "Table: Statistics summary.", digits = 4,
+          pos = "left", bso = "striped")
+{
+    s = summary(df)
+
+    # Including RE NA's strip
+    # Needed to add a dim check because including NA strip when no NA row made a new 7th row with text Min.:
+    if (dim(s)[1] == 6) {
+      strip_vector = c("Min.\\s*:\\s*", "1st Qu.\\s*:\\s*", "Median\\s*:\\s*", "Mean\\s*:\\s*",
+                       "3rd Qu.\\s*:\\s*", "Max.\\s*:\\s*")
+    }
+    # NA's strip RE added here
+    else if (dim(s)[1] == 7) {
+      strip_vector = c("Min.\\s*:\\s*", "1st Qu.\\s*:\\s*", "Median\\s*:\\s*", "Mean\\s*:\\s*",
+                       "3rd Qu.\\s*:\\s*", "Max.\\s*:\\s*", "NA's\\s*:\\s*")
+    }
+
+    # Made s = apply() -- without, didn't apply changes to table
+    s <- apply(s, 2, function(x) stringr::str_remove_all(x, strip_vector))
+
+    # Made s = apply()
+    s <- apply(s, 2, function(x) stringr::str_trim(x, "right"))
+    colnames(s) <- stringr::str_trim(colnames(s))
+
+    if (dim(s)[1] == 6) {
+        rownames(s) <- c("Min", "Q1", "Median",
+                         "Mean", "Q3", "Max")
+    }
+    else if (dim(s)[1] == 7) {
+        rownames(s) <- c("Min", "Q1", "Median",
+                         "Mean", "Q3", "Max", "NA")
+    }
+    xkabledply(s, title = title, digits = digits, pos = pos,
+               bso = bso)
+}
+
+#Better looking version of 2-sample t-test results than what the object itself displays
+ttest2sample_info <- function(test) {
+  if (test[["p.value"]] <= 0.05) {
+  result = 'Reject the Null Hypothesis'
+  } else {
+    result = 'Do not reject the Null Hypothesis'
+  }
+
+  cat(c('\t', test$method, '\n\n',
+      'Data:                       ', '|   ', test$data.name, '\n',
+      'Null Hypothesis:            ', '|   true difference in means = ', test$null.value[1], '\n',
+      'Alternative Hypothesis:     ', '|   true difference in means != ', test$null.value[1], '\n',
+      'Confidence Level:           ', '|   ', attributes(test$conf.int)$conf.level, '\n',
+      'Confidence Interval:        ', '|   [', round(test$conf.int[1], 2), ', ', round(test$conf.int[2], 2)), ']\n',
+      'Sample Estimates of Mean:   ', '|   [X = ', test$estimate[1], ', Y = ', test$estimate[2], ']\n',
+      'Test Values:                ', '|   [t = ', test$statistic,
+                                   ', df = ', test$parameter[1],
+                                   ', p-value = ', test[["p.value"]], ']\n',
+      'Result:                     ', '|   ', result, sep='')
+}
+
+```
+
+Ready to continue...
+
+```{r}
+str(filtered_joined_churn_df)
+```
+
+---
+
+# 1. Review of EDA and SMART Questions
+
+# 2. Graphs of Variables
+
+# 3. Models
+
+### 3.1 Logistic Model
+
+```{r results='markup'}
+
+#age_pclass_Logit <- glm(survived ~ age + pclass, data=titanic_clean, family="binomial")
+
+#Senior.Citizen + Partner + Dependents + Contract + Monthly.Charges + Internet.Service + Unlimited.Data + Avg.Monthly.GB.Download + Tech.Support + Online.Backup + Online.Security + Phone.Service + Tenure.Months + Paperless.Billing + Payment.Method + Satisfaction.Score
+
+test_logit_model <- glm(Churn.Label ~ Senior.Citizen + Partner + Dependents + Contract + Monthly.Charges + Internet.Service + Unlimited.Data + Avg.Monthly.GB.Download + Tech.Support + Online.Backup + Online.Security + Phone.Service + Tenure.Months + Paperless.Billing + Payment.Method, data=filtered_joined_churn_df, family="binomial")
+summary(test_logit_model)
+xkabledply(test_logit_model)
+
+```
+
+Exponentiate both sides of equation to get growth and decay factors...
+
+```{r results='markup'}
+#exponentiate both sides of the equation
+expcoeff <- exp(coef(test_logit_model))
+xkabledply(as.table(expcoeff), title='Growth and Decay Factors After Exponentiation') 
+```
+
+Exponentiated Equation
+
+$\frac{p}{q} = `r format(expcoeff[1], digits=6)` * (`r format(expcoeff[2], digits=6)`)^{senior}$
+
+Predict
+
+```{r results='markup'}
+#predict_df <- data.frame(Senior.Citizen=as.factor(c('Yes', 'Yes', 'Yes', 'No', 'No')), Partner=as.factor(c('Yes', 'Yes', 'No', 'Yes', 'No')), Dependents=as.factor(c('Yes', 'No', 'Yes', 'Yes', 'No'))) # new data frame with 1 row
+#pred_response <- predict(test_logit_model, newdata = predict_df, type = "response")
+#pred_response
+
+############################################################
+
+#HELP WITH MAKING CUTOFF
+# The code for the logistic regression model and the predictions is given below
+#log_model_full <- glm(loan_status ~ ., family = "binomial", data = training_set)
+#predictions_all_full <- predict(log_model_full, newdata = test_set, type = "response")
+
+# Make a binary predictions-vector using a cut-off of 15%
+#pred_cutoff_15 <- ifelse(predictions_all_full > 0.15, 1, 0)
+
+# Construct a confusion matrix
+#table(test_set$loan_status, pred_cutoff_15)
+
+############################################################
+
+#0.361
+#0.263
+#0.265
+
+predictions_test_model <- test_logit_model$fitted.values
+pred_cutoff_15 <- ifelse(predictions_test_model > 0.265, 1, 0)
+
+confusion_matrix_cutoff <- table(filtered_joined_churn_df$Churn.Label, pred_cutoff_15)
+confusion_matrix_cutoff
+
+############################################################
+
+#Turn from kable into data frame (was having trouble accessing elements as a kable)
+confusion_matrix_cutoff_df <- data.frame(table(filtered_joined_churn_df$Churn.Label, pred_cutoff_15))
+confusion_matrix_cutoff_df <- reshape(confusion_matrix_cutoff_df, idvar = "Var1", timevar = "pred_cutoff_15", direction = "wide")
+confusion_matrix_cutoff_df <- select(confusion_matrix_cutoff_df, c(2,3))
+#confusion_matrix_cutoff_df
+
+
+
+accuracy <- (confusion_matrix_cutoff_df[1,1] + confusion_matrix_cutoff_df[2,2])/confusion_matrix_cutoff_df %>% sum()
+precision <- confusion_matrix_cutoff_df[2,2]/(confusion_matrix_cutoff_df[2,2] + confusion_matrix_cutoff_df[1,2])
+recall_rate <- confusion_matrix_cutoff_df[2,2]/(confusion_matrix_cutoff_df[2,2] + confusion_matrix_cutoff_df[2,1])
+specificity <- confusion_matrix_cutoff_df[1,1]/(confusion_matrix_cutoff_df[1,1] + confusion_matrix_cutoff_df[1,2])
+f1_score <- 2*(precision)*(recall_rate)/(precision + recall_rate)
+
+cat('\naccuracy:     ', accuracy, '\n')
+cat('precision:    ', precision, '\n')
+cat('recal:        ', recall_rate, '\n')
+cat('specificity:  ', specificity, '\n')
+cat('f1:           ', f1_score, '\n')
+
+#accuracy
+#precision
+#recall_rate
+#specificity
+#f1_score
+```
+
+---
+
+#### Model Tests
+
+**Coefficient P-values**
+
+The p-value is low for all coefficients. The test is passed.
+
+---
+
+**Confusion Matrix**
+
+```{r results='markup'}
+#Create and display the confusion matrix
+confusion_matrix_test <- xkabledply(confusion_matrix(test_logit_model), title = "Confusion Matrix for Test Logistical Model" )
+confusion_matrix_test
+
+```
+
+```{r}
+#Turn from kable into data frame (was having trouble accessing elements as a kable)
+confusion_matrix_test_df <- data.frame(confusion_matrix(test_logit_model))
+confusion_matrix_test_df
+
+accuracy <- (confusion_matrix_test_df[1,1] + confusion_matrix_test_df[2,2])/confusion_matrix_test_df[3,3]
+precision <- confusion_matrix_test_df[2,2]/(confusion_matrix_test_df[2,2] + confusion_matrix_test_df[1,2])
+recall_rate <- confusion_matrix_test_df[2,2]/(confusion_matrix_test_df[2,2] + confusion_matrix_test_df[2,1])
+specificity <- confusion_matrix_test_df[1,1]/(confusion_matrix_test_df[1,1] + confusion_matrix_test_df[1,2])
+f1_score <- 2*(precision)*(recall_rate)/(precision + recall_rate)
+
+# 1. **Accuracy:** *(TP + TN)/Total*
+# * `r (confusion_matrix_test_df[1,1] + confusion_matrix_test_df[2,2])/confusion_matrix_test_df[3,3]`
+# * The model correctly predicts survived or died `r round((confusion_matrix_test_df[1,1] + confusion_matrix_test_df[2,2])/confusion_matrix_test_df[3,3], digits=3)*100`% of the time.
+# 2. **Precision:** *TP/(TP + FP)*
+# * `r confusion_matrix_test_df[2,2]/(confusion_matrix_test_df[2,2] + confusion_matrix_test_df[1,2])`
+# * Of the values that are predicted true by the model, `r round(confusion_matrix_test_df[2,2]/(confusion_matrix_test_df[2,2] + confusion_matrix_test_df[1,2]), digits=3)*100`% of them actually are true.
+# 3. **Recall Rate:** *TP/(TP + FN)*
+# * `r confusion_matrix_test_df[2,2]/(confusion_matrix_test_df[2,2] + confusion_matrix_test_df[2,1])`
+# * Of the values that actually are true, the model correctly predicts `r round(confusion_matrix_test_df[2,2]/(confusion_matrix_test_df[2,2] + confusion_matrix_test_df[2,1]), digits=3)*100`% of them as true.
+# 4. **Specificity:** *TN/(TN + FP)*
+# * `r confusion_matrix_test_df[1,1]/(confusion_matrix_test_df[1,1] + confusion_matrix_test_df[1,2])`
+# * Of the values that are actually false, the model correctly predicts `r round(confusion_matrix_test_df[1,1]/(confusion_matrix_test_df[1,1] + confusion_matrix_test_df[1,2]), digits=3)*100`% of them as false.
+# 5. **F1 Score:** *2(Precision)(Recall)/(Precision + Recall)*
+# * `r 2*(0.753)*(0.714)/(0.753 + 0.714)`
+# * The harmonic mean of Precision and Recall, a more balanced view of how good the model is.
+
+```
+
+
+1. **Accuracy:** *(TP + TN)/Total*
+* `r accuracy`
+* The model correctly predicts churn or non-churn `r round(accuracy, digits=3)*100`% of the time.
+2. **Precision:** *TP/(TP + FP)*
+* `r precision`
+* Of the values that are predicted true by the model, `r round(precision, digits=3)*100`% of them actually are true.
+3. **Recall Rate:** *TP/(TP + FN)*
+* `r recall_rate`
+* Of the values that actually are true, the model correctly predicts `r round(recall_rate, digits=3)*100`% of them as true.
+4. **Specificity:** *TN/(TN + FP)*
+* `r specificity`
+* Of the values that are actually false, the model correctly predicts, `r round(specificity, digits=3)*100`% of them as false.
+5. **F1 Score:** *2(Precision)(Recall)/(Precision + Recall)*
+* `r f1_score`
+* The harmonic mean of Precision and Recall, a more balanced view of how good the model is.
+
+*Comments*
+
+The model with sex added performs much better than the model without sex. All scores are above 70%. Focusing in on the F1 Score, this model is reasonably good at 'catching' survivors in the data as well as being correct when it predicts survival. 
+
+---
+
+**ROC-AUC**
+
+Area under the curve, testing the true positive rate (or recall) against the false positive rate (or specificity).
+
+```{r}
+#Get the probability of survival for each passenger from the model
+prob_test=predict(test_logit_model, type = "response" )
+#Create new column in df of predicted probability of survival 
+filtered_joined_churn_df$prob=prob_test
+#Determine the ratio of true-positive-rate/false-positive rate as a curve between 0.5 and 1
+roc_data <- roc(Churn.Label~prob, data=filtered_joined_churn_df)
+#Plot as graph
+plot(roc_data)
+#Value of area under the curve, prefer 0.8 or higher.
+#auc(roc_data2) # area-under-curve 
+# unloadPkg("pROC")
+```
+
+*Comments*
+
+* This model produces a score of `r auc(roc_data)`
+
+---
+
+**McFadden**
+
+```{r}
+#calculate McFadden statistics, the pseudo r^2
+test_pr2 = pR2(test_logit_model)
+test_pr2[4]
+
+```
+
+The pseudo $r^2$ value for the `sex`, `age`, and `pclass` model, using the McFadden method of calculation, is `r test_pr2[4]`. This means that `r round(test_pr2[4], digits=3)*100`% of the variance seen in the data is accounted for by this model.
+
+---
+
+**AIC/BIC and Deviance**
+
+* The AIC of the `sex`, `age`, and `pclass` model is: `r test_logit_model$aic` 
+* The Residual Deviance of the `sex`, `age`, and `pclass` model is: `r test_logit_model$deviance` 
+
+---
+
+
+
+
+
+
+# Full Logit Model
+
+```{r results='markup'}
+full_logit_model <- glm(Churn.Label ~ Senior.Citizen, data=filtered_joined_churn_df, family="binomial")
+summary(full_logit_model)
+xkabledply(full_logit_model)
+
+```
+
+Exponentiate both sides of equation to get growth and decay factors...
+
+```{r results='markup'}
+#exponentiate both sides of the equation
+expcoeff <- exp(coef(full_logit_model))
+xkabledply(as.table(expcoeff), title='Growth and Decay Factors After Exponentiation') 
+```
+
+Exponentiated Equation
+
+$\frac{p}{q} = `r format(expcoeff[1], digits=6)` * (`r format(expcoeff[2], digits=6)`)^{senior}$
+
+Predict
+
+```{r results='markup'}
+predict_df <- data.frame(Senior.Citizen=as.factor(c('Yes'))) # new data frame with 1 row
+pred_response <- predict(full_logit_model, newdata = predict_df, type = "response")
+pred_response
+```
+
+---
+
+### 3.2 Random Forest Model
+
+---
+
+### 3.3 SVM Model
+
+---
+
+### 3.4 Decision Tree Model
+
+---
+
+# 4. Model Comparisons
+
+### 4.1 Accuarcy of Models
+
+---
+
+### 4.2 Log Loss of Models
+
+---
+
+### 4.3 Final Model Selection
+
+---
+
+# 5. Answering SMART Questions
+
+---
+
+# 6. Summary
