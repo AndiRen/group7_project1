@@ -420,7 +420,127 @@ pred_response
 
 ### 3.4 Decision Tree Model
 
+
+**Feature selection**
+***variable importance***
+
+```{r results='markup'}
+
+loadPkg("rpart")
+
+library(caret)
+
+
+fit_dt = rpart(Churn.Label~., data=filtered_joined_churn_df, method="class", control = list(maxdepth = 4))
+
+varImp(fit_dt)
+
+
+```
+
+```{r results='markup'}
+
+control <- rfeControl(functions = rpart, # random forest
+                      method = "repeatedcv", # repeated cv
+                      repeats = 5, # number of repeats
+                      number = 10) # number of folds
+
+
+
+
+```
+
+
+```{r results='markup'}
+
+# Features
+x <- filtered_joined_churn_df %>%
+  select(-Churn.Label) %>%
+  as.data.frame()
+
+# Target variable
+y <- filtered_joined_churn_df$Churn.Label
+
+y <- as.factor(y)
+
+
+# Training: 80%; Test: 20%
+set.seed(2021)
+inTrain <- createDataPartition(y, p = .80, list = FALSE)[,1]
+
+x_train <- x[ inTrain, ]
+x_test  <- x[-inTrain, ]
+
+y_train <- y[ inTrain]
+y_test  <- y[-inTrain]
+
+
+
+x_train =  as.data.frame(x_train)
+
+y_train =  as.data.frame(y_train)
+
+
+
+
+typeof(x_train)
+
+typeof(y_train)
+
+typeof(filtered_joined_churn_df)
+
+nrow(x_train)
+
+nrow(y_train)
+
+
+```
+
+
+```{r results='markup'}
+
+#x_train = as.vector(unlist(c(x_train)))
+
+#y_train = as.vector(unlist(c(y_train)))
+
+y_train <- as.factor(y_train)
+
+typeof(y_train)
+
+```
+
+```{r results='markup'}
+
+# Run RFE
+#result_rfe1 <- rfe(x = x_train, y = y_train, sizes = c(1:8),rfeControl = control)
+
+
+
+
+# Print the results
+#result_rfe1
+
+# Print the selected features
+#predictors(result_rfe1)
+
+# Print the results visually
+#ggplot(data = result_rfe1, metric = "Accuracy") + theme_bw()
+#ggplot(data = result_rfe1, metric = "Kappa") + theme_bw()
+
+
+
+```
+
+
+
+
+
+
+
+
 ---
+
+
 
 # 4. Model Comparisons
 
