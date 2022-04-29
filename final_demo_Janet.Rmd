@@ -12,13 +12,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Load Package
 ```{r}
-library(DT)
 library(tidyverse)
-library(ezids)
 library(knitr)
 library(kableExtra)
 library(xtable)
 library(Hmisc)
+library(MASS)
+library(car)
+library(e1071)
+library(caret)
+library(cowplot)
+library(caTools)
+library(pROC)
+library(ggcorrplot)
 # The package "ezids" (EZ Intro to Data Science) includes a lot of the helper functions we developed for the course. 
 # Some of the frequently used functions are loadPkg(), xkabledply(), xkablesummary(), uzscale(), etc.
 library(ezids)
@@ -105,6 +111,181 @@ xkabledply(tgLogit, title = paste("Logistic Regression :", format(formula(tgLogi
 summary(tgLogit)
 ```
 
+## 2. Random forest
 
+### clean categorical feature 
+```{r}
+str(tg)
+```
+
+
+```{r}
+tg <- data.frame(lapply(tg, function(x){ gsub("No internet service", "No", x)}))
+tg <- data.frame(lapply(tg, function(x){ gsub("No phone service", "No", x)}))
+#str(tg)
+```
+
+### Standardising Continuous features
+```{r}
+# null value in total charge
+tg$Total.Charges[is.na(tg$Total.Charges)] <- mean(tg$Total.Charges, na.rm = T) 
+```
+
+
+```{r}
+num_columns <- c("Tenure.Months", "Monthly.Charges", "Total.Charges")
+tg[num_columns] <- sapply(tg[num_columns], as.numeric)
+
+tg_int <- tg[,c("Tenure.Months", "Monthly.Charges", "Total.Charges")]
+tg_int <- data.frame(scale(tg_int))
+```
+
+###  create discrete options of features
+```{r}
+tg <- mutate(tg, tenure_bin = Tenure.Months)
+
+tg$tenure_bin[tg$tenure_bin >=0 & tg$tenure_bin <= 12] <- '0-1 year'
+tg$tenure_bin[tg$tenure_bin > 12 & tg$tenure_bin <= 24] <- '1-2 years'
+tg$tenure_bin[tg$tenure_bin > 24 & tg$tenure_bin <= 36] <- '2-3 years'
+tg$tenure_bin[tg$tenure_bin > 36 & tg$tenure_bin <= 48] <- '3-4 years'
+tg$tenure_bin[tg$tenure_bin > 48 & tg$tenure_bin <= 60] <- '4-5 years'
+tg$tenure_bin[tg$tenure_bin > 60 & tg$tenure_bin <= 72] <- '5-6 years'
+```
+
+```{r}
+tg$tenure_bin <- as.factor(tg$tenure_bin)
+```
+
+```{r}
+options(repr.plot.width =6, repr.plot.height = 3)
+ggplot(tg, aes(tenure_bin, fill = tenure_bin)) + geom_bar()
+```
+
+### creat dummy
+
+```{r}
+tg_c1 <- tg[,c("Paperless.Billing", "Payment.Method", "Tech.Support","Online.Backup","Contract","Internet.Service","Partner","Senior.Citizen","Dependents","Churn.Label")]
+
+```
+
+
+
+```{r}
+#creat dummy
+dummy<- data.frame(sapply(tg_c1,function(x) data.frame(model.matrix(~x-1,data =tg_c1))[,-1]))
+
+tail(dummy, n=20)
+
+```
+
+### creat final data set
+
+```{r}
+#Combining the data
+tg_final <- cbind(tg_int,dummy)
+head(tg_final)
+tg_final$Churn.Label<- as.factor(tg_final$Churn.Label)
+```
+
+
+
+### splitting train test data
+
+```{r}
+#Splitting the data
+library(randomForest)
+set.seed(123)
+indices = sample.split(tg_final$Churn.Label, SplitRatio = 0.7)
+train = tg_final[indices,]
+validation = tg_final[!(indices),]
+```
+
+```{r}
+#Training the RandomForest Model
+
+model.rf <- randomForest(Churn.Label ~ ., data=train, proximity=F,importance = F,ntree=500,mtry=4, do.trace=F, na.action=na.roughfix)
+model.rf
+```
+
+
+```{r}
+#Predicting on the validation set and checking the Confusion Matrix.
+testPred <- predict(model.rf, train)
+#table(testPred, validation$Churn.Label)
+
+confusionMatrix(as.factor(testPred),
+  as.factor(train$Churn.Label))
+
+```
+
+
+```{r}
+
+varImpPlot(model.rf)
+
+```
+##### overfitting???
+
+```{r}
+tg_c2 <- tg[,c("Paperless.Billing", "Tech.Support","Contract","Internet.Service","Dependents","Churn.Label")]
+
+```
+
+```{r}
+#creat dummy
+dummy2<- data.frame(sapply(tg_c2,function(x) data.frame(model.matrix(~x-1,data =tg_c2))[,-1]))
+
+#ail(dummy2, n=20)
+
+```
+
+### creat final data set
+
+```{r}
+#Combining the data
+tg_final2 <- cbind(tg_int,dummy2)
+head(tg_final2)
+tg_final2$Churn.Label<- as.factor(tg_final2$Churn.Label)
+```
+
+```{r}
+#Splitting the data
+set.seed(123)
+indices2 = sample.split(tg_final2$Churn.Label, SplitRatio = 0.7)
+train2 = tg_final2[indices2,]
+validation2 = tg_final2[!(indices2),]
+```
+
+```{r}
+rf<- randomForest(Churn.Label ~ ., data=train2, proximity=F,importance = F,ntree=500,mtry=4, do.trace=F, na.action=na.roughfix)
+print(rf)
+```
+# accuracy = 80%
+```{r}
+testPred2 <- predict(rf, newdata=validation2[,-24])
+#table(testPred2, validation2$Churn.Label)
+
+confusionMatrix(validation2$Churn.Label, testPred2)
+```
+```{r}
+#Checking the variable Importance Plot
+varImpPlot(rf)
+```
+
+
+
+```{r}
+rf.roc <- roc(response = validation$Churn, predictor = as.numeric(testPred))
+plot(rf.roc, col = "red" , add = TRUE, print.auc.y = 0.85, print.auc = TRUE)
+
+```
+
+
+### heatmap
+
+```{r}
+cormat <- round(cor(as.numeric(tg_final)),2)
+head(cormat)
+```
 
 ## Model Evaluation and comparsion
