@@ -275,7 +275,7 @@ varImpPlot(rf)
 
 
 ```{r}
-rf.roc <- roc(response = validation$Churn, predictor = as.numeric(testPred))
+rf.roc <- roc(response = validation2$Churn.Label, predictor = as.numeric(testPred2))
 plot(rf.roc, col = "red" , add = TRUE, print.auc.y = 0.85, print.auc = TRUE)
 
 ```
