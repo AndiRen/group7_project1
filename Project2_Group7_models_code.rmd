@@ -424,16 +424,30 @@ pred_response
 **Feature selection**
 ***variable importance***
 
-```{r results='markup'}
+```{r results='hide'}
 
 loadPkg("rpart")
 
 library(caret)
 
+library(tidyr)
 
-fit_dt = rpart(Churn.Label~., data=filtered_joined_churn_df, method="class", control = list(maxdepth = 4))
+install.packages("dplyr")
 
-varImp(fit_dt)
+library("dplyr")
+
+filtered_joined_churn_df %>% na.omit(filtered_joined_churn_df)
+
+
+
+
+
+filtered_joined_churn_df[complete.cases(filtered_joined_churn_df), ]
+
+filtered_joined_churn_df %>% drop_na()
+
+
+
 
 
 ```
@@ -450,89 +464,131 @@ control <- rfeControl(functions = rpart, # random forest
 
 ```
 
-
 ```{r results='markup'}
 
-# Features
-x <- filtered_joined_churn_df %>%
-  select(-Churn.Label) %>%
-  as.data.frame()
-
-# Target variable
-y <- filtered_joined_churn_df$Churn.Label
-
-y <- as.factor(y)
 
 
-# Training: 80%; Test: 20%
-set.seed(2021)
-inTrain <- createDataPartition(y, p = .80, list = FALSE)[,1]
-
-x_train <- x[ inTrain, ]
-x_test  <- x[-inTrain, ]
-
-y_train <- y[ inTrain]
-y_test  <- y[-inTrain]
-
-
-
-x_train =  as.data.frame(x_train)
-
-y_train =  as.data.frame(y_train)
+head(filtered_joined_churn_df)
 
 
 
 
-typeof(x_train)
-
-typeof(y_train)
-
-typeof(filtered_joined_churn_df)
-
-nrow(x_train)
-
-nrow(y_train)
+library(superml)
 
 
-```
 
 
-```{r results='markup'}
+label <- LabelEncoder$new()
 
-#x_train = as.vector(unlist(c(x_train)))
 
-#y_train = as.vector(unlist(c(y_train)))
+filtered_joined_churn_df$Internet.Service <- label$fit_transform(filtered_joined_churn_df$Internet.Service)
 
-y_train <- as.factor(y_train)
 
-typeof(y_train)
+
+filtered_joined_churn_df$Contract <- label$fit_transform(filtered_joined_churn_df$Contract)
+
+
+
+filtered_joined_churn_df$Payment.Method <- label$fit_transform(filtered_joined_churn_df$Payment.Method)
+
+
+
+
+
+
+
+
 
 ```
 
 ```{r results='markup'}
 
-# Run RFE
-#result_rfe1 <- rfe(x = x_train, y = y_train, sizes = c(1:8),rfeControl = control)
+
+filtered_joined_churn_df$Churn.Label <- ifelse(filtered_joined_churn_df$Churn.Label == "Yes",1,0)
+
+filtered_joined_churn_df$Dependents  <- ifelse(filtered_joined_churn_df$Dependents  == "Yes",1,0)
+
+filtered_joined_churn_df$Senior.Citizen <- ifelse(filtered_joined_churn_df$Senior.Citizen== "Yes",1,0)
+
+filtered_joined_churn_df$Partner <- ifelse(filtered_joined_churn_df$Partner== "Yes",1,0)
+
+filtered_joined_churn_df$Tenure.Months <- ifelse(filtered_joined_churn_df$Tenure.Months == "Yes",1,0)
+
+filtered_joined_churn_df$Phone.Service <- ifelse(filtered_joined_churn_df$Phone.Service == "Yes",1,0)
+
+filtered_joined_churn_df$Online.Security <- ifelse(filtered_joined_churn_df$Online.Security == "Yes",1,0)
+
+filtered_joined_churn_df$Online.Backup <- ifelse(filtered_joined_churn_df$Online.Backup == "Yes",1,0)
+
+filtered_joined_churn_df$Tech.Support <- ifelse(filtered_joined_churn_df$Tech.Support == "Yes",1,0)
+
+filtered_joined_churn_df$Paperless.Billing <- ifelse(filtered_joined_churn_df$Paperless.Billing == "Yes",1,0)
+
+filtered_joined_churn_df$Unlimited.Data <- ifelse(filtered_joined_churn_df$Unlimited.Data == "Yes",1,0)
 
 
 
 
-# Print the results
-#result_rfe1
 
-# Print the selected features
-#predictors(result_rfe1)
+head(filtered_joined_churn_df)
 
-# Print the results visually
-#ggplot(data = result_rfe1, metric = "Accuracy") + theme_bw()
-#ggplot(data = result_rfe1, metric = "Kappa") + theme_bw()
+
+
+
+myvars <- c("Churn.Label","Senior.Citizen", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.Long.Distance.Charges","Avg.Monthly.GB.Download","Monthly.Charges","Tenure.Months")
+
+
+
+n <- filtered_joined_churn_df[myvars]
+
+
+
+
+myvars <- c("Senior.Citizen", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.Long.Distance.Charges","Avg.Monthly.GB.Download","Monthly.Charges","Tenure.Months")
+
+
+
+a <- n[myvars]
+
+typeof(a)
+
+nrow(a)
+
+head(a)
+
+
+
+
+
+n$Churn.Label <- as.factor(n$Churn.Label)
+                              
+
+
+
+
+head(n$Churn.Label)
+
+typeof(n$Churn.Label)
+
+
+b = as.factor(n["Churn.Label"])
+
+
+
+
+
 
 
 
 ```
 
+```{r results='markup'}
 
+fit_dt = rpart(Churn.Label~., data=filtered_joined_churn_df, method="class", control = list(maxdepth = 4))
 
+varImp(fit_dt)
+
+```
 
 
 
