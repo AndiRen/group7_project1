@@ -897,6 +897,42 @@ Offer an additional $10 off monthly charges for customers willing to sign a 2-ye
 
 ### 3.3 SVM Model
 
+```{r}
+summary(filtered_joined_churn_df)
+```
+
+```{r}
+library('caret')
+
+intrain <- createDataPartition(y = filtered_joined_churn_df$Churn.Label, p= 0.7, list = FALSE)
+training <- heart[intrain,]
+testing <- heart[-intrain,]
+```
+
+
+#Checking the dimensions of our training data frame and testing data frame
+```{r}
+dim(training); 
+dim(testing);
+```
+
+
+```{r}
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+```
+
+
+```{r}
+svm_Linear <- train(Churn.Label ~., data = filtered_joined_churn_df, method = "svmLinear", trControl=trctrl, preProcess = c("center", "scale"), tuneLength = 10)
+```
+
+```{r}
+
+```
+
+
+
+
 ---
 
 ### 3.4 Decision Tree Model
