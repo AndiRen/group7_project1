@@ -197,7 +197,7 @@ filtered_joined_churn_df %>%
 
 <br>
 
-#### Satisfaction Logit Model 
+#### **Satisfaction Logistic Model** 
 
 <br>
 
@@ -257,7 +257,7 @@ xkabledply(pred_response_df, title="Churn Predictions Using Only Satisfaction Sc
 
 <br>
 
-#### Satisfaction Model Tests
+#### **Satisfaction Model Tests**
 
 <br>
 
@@ -370,7 +370,7 @@ The pseudo $r^2$ value for the Satisfaction model, using the McFadden method of 
 
 ---
 
-**Satisfaction Model Takeaway**
+#### **Satisfaction Model Takeaways**
 
 * A customer's satisfaction score almost perfectly predicts Churn and Non-Churn
 * All 1-2 satisfaction score customers were Churn
@@ -383,7 +383,7 @@ The pseudo $r^2$ value for the Satisfaction model, using the McFadden method of 
 
 <br>
 
-**Full Logistic Model**
+#### **Full Logistic Model**
 
 <br>
 
@@ -423,7 +423,7 @@ xkabledply(as.table(expcoeff), title='Growth and Decay Factors After Exponentiat
 
 <br>
 
-$\frac{p}{q} = `r format(expcoeff[1], digits=6)` * (`r format(expcoeff[2], digits=6)`)^{senior} * (`r format(expcoeff[3], digits=6)`)^{partner} * (`r format(expcoeff[4], digits=6)`)^{dependent} * (`r format(expcoeff[5], digits=6)`)^{tenure} * (`r format(expcoeff[6], digits=6)`)^{phone}$  
+$\frac{p}{q} = `r format(expcoeff[1], digits=6)` * (`r format(expcoeff[2], digits=6)`)^{senior} * (`r format(expcoeff[3], digits=6)`)^{partner} * (`r format(expcoeff[4], digits=6)`)^{dependents} * (`r format(expcoeff[5], digits=6)`)^{tenure} * (`r format(expcoeff[6], digits=6)`)^{phone}$  
 
 $*  (`r format(expcoeff[7], digits=6)`)^{fiberOptic} * (`r format(expcoeff[8], digits=6)`)^{noInt} * (`r format(expcoeff[10], digits=6)`)^{oSecurity} * (`r format(expcoeff[12], digits=6)`)^{oBackup} * (`r format(expcoeff[14], digits=6)`)^{techSup} * (`r format(expcoeff[15], digits=6)`)^{cont1yr}$  
 
@@ -435,7 +435,7 @@ $*  (`r format(expcoeff[21], digits=6)`)^{monthlyCharge} * (`r format(expcoeff[2
 
 ---
 
-#### Full Model Tests
+#### **Full Model Tests**
 
 <br>
 
@@ -555,7 +555,7 @@ The pseudo $r^2$ value for the full model, using the McFadden method of calculat
 
 ---
 
-**Full Model Takeaway**
+#### **Full Model Takeaways**
 
 * The high p-values for the coefficients of a number of factors indicates that further feature selection is needed.
 * The relatively low precision and recall rate suggests that a cut off score other than 0.5 needs to be used.
@@ -563,7 +563,7 @@ The pseudo $r^2$ value for the full model, using the McFadden method of calculat
 
 ---
 
-**Final Model**
+#### **Final Logistic Model**
 
 <br>
 
@@ -620,11 +620,13 @@ xkabledply(as.table(expcoeff), title='Growth and Decay Factors After Exponentiat
 
 <br>
 
-Equation Text HERE
+$\frac{p}{q} = `r format(expcoeff[1], digits=6)` * (`r format(expcoeff[2], digits=6)`)^{dependents} * (`r format(expcoeff[3], digits=6)`)^{phone} * (`r format(expcoeff[4], digits=6)`)^{cont1yr}$
+
+$* (`r format(expcoeff[5], digits=6)`)^{cont2yr} * (`r format(expcoeff[6], digits=6)`)^{paperless} * (`r format(expcoeff[7], digits=6)`)^{monthlyCharge} * (`r format(expcoeff[8], digits=6)`)^{monthlyGB}$
 
 <br>
 
-#### Final Model Tests
+#### **Final Model Tests**
 
 <br>
 
@@ -738,13 +740,11 @@ The pseudo $r^2$ value for the final model, using the McFadden method of calcula
 
 ---
 
-**Adjust Cut Off Value**
+#### **Adjust Cut Off Value: Final Model**
 
 <br>
 
 **Confusion Matrix: Final Model, 0.29 Cut Off**
-
-With a custom cut-off value...
 
 ```{r results='markup'}
 
@@ -872,7 +872,22 @@ When the Brier Test Method is used for an unbalanced Data Set, the result is:
 
 ---
 
-**Final Model Takeaway**
+#### **Final Logistic Model Takeaways**
+
+* Avg. Monthly GB (p-val: 0.051) kept because it connected closely with reasons customers gave for leaving 
+* Long-term contracts biggest factor in keeping customers with the company
+* Roughly every ~100 GB of monthly download decays odds-ratio of customer churning by 10%
+* The overall avg Monthly Charge of ~$65, has a 3-fold growth effect on the odds-ratio of a customer churning
+* Adjusting the cutoff significantly improves recall rate (+25%) while only suffering a minor hit to precision (-8.2%)
+* Brier Test for Log Loss (0.245) shows a model that performs reasonably well 
+
+#### **Suggestion Based on Model**
+
+Offer an additional $10 off monthly charges for customers willing to sign a 2-year contract. Assuming the ideal scenario were this causes all would-be churners to stay with the company, the following benefits are gained:
+
+* Adjusted cut off saves $~364K a year by 'catching' 25% more of Churners compared to default cut off
+* Adjusted cut off loses an extra ~$91k by offering discounts to customers that wouldn't have churned
+* Value of implementing retainment plan according to model with adjusted cut off: ~$273k a year 
 
 ---
 
