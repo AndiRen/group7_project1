@@ -115,7 +115,8 @@ summary(tgLogit)
 
 ### clean categorical feature 
 ```{r}
-str(tg)
+glimpse(tg)
+
 ```
 
 
@@ -123,6 +124,9 @@ str(tg)
 tg <- data.frame(lapply(tg, function(x){ gsub("No internet service", "No", x)}))
 tg <- data.frame(lapply(tg, function(x){ gsub("No phone service", "No", x)}))
 #str(tg)
+
+glimpse(tg)
+
 ```
 
 ### Standardising Continuous features
@@ -164,7 +168,7 @@ ggplot(tg, aes(tenure_bin, fill = tenure_bin)) + geom_bar()
 ### creat dummy
 
 ```{r}
-tg_c1 <- tg[,c("Paperless.Billing", "Payment.Method", "Tech.Support","Online.Backup","Contract","Internet.Service","Partner","Senior.Citizen","Dependents","Churn.Label")]
+tg_c1 <- tg[,c("Paperless.Billing", "Payment.Method","tenure_bin", "Tech.Support","Online.Backup","Contract","Internet.Service","Partner","Senior.Citizen","Dependents","Churn.Label")]
 
 ```
 
@@ -177,9 +181,6 @@ dummy<- data.frame(sapply(tg_c1,function(x) data.frame(model.matrix(~x-1,data =t
 tail(dummy, n=20)
 
 ```
-
-### creat final data set
-
 ```{r}
 #Combining the data
 tg_final <- cbind(tg_int,dummy)
@@ -187,6 +188,79 @@ head(tg_final)
 tg_final$Churn.Label<- as.factor(tg_final$Churn.Label)
 ```
 
+
+### **creat final data set
+```{r}
+tg_int2 <- tg_int[,c("Monthly.Charges", "Total.Charges")]
+```
+
+
+```{r}
+#Combining the data
+tg_final <- cbind(tg_int2,dummy)
+head(tg_final)
+tg_final$Churn.Label<- as.factor(tg_final$Churn.Label)
+```
+
+#### Not using discerete Tenure.Month model
+```{r}
+head(tg,5)
+```
+
+```{r}
+#final_data
+tg_c <- tg[,c("Paperless.Billing", "Payment.Method","Tenure.Months","Tech.Support","Online.Backup","Contract","Internet.Service","Partner","Senior.Citizen","Dependents","Churn.Label")]
+dummy0<- data.frame(sapply(tg_c,function(x) data.frame(model.matrix(~x-1,data =tg_c1))[,-1]))
+
+#tail(dummy, n=20)
+#Combining the data
+tg_final0 <- cbind(tg_int,dummy0)
+#head(tg_final)
+tg_final0$Churn.Label<- as.factor(tg_final0$Churn.Label)
+
+```
+
+
+```{r}
+#Splitting the data
+library(randomForest)
+set.seed(123)
+indices = sample.split(tg_final$Churn.Label, SplitRatio = 0.7)
+train = tg_final[indices,]
+validation = tg_final[!(indices),]
+```
+
+```{r}
+#Training the RandomForest Model
+
+model <- randomForest(Churn.Label ~ ., data=train, proximity=F,importance = F,ntree=500,mtry=4, do.trace=F, na.action=na.roughfix)
+model
+```
+```{r}
+testPred <- predict(model, newdata=validation[,-24])
+#table(testPred2, validation2$Churn.Label)
+
+confusionMatrix(validation$Churn.Label, testPred)
+```
+```{r}
+#Checking the variable Importance Plot
+varImpPlot(model)
+```
+
+
+
+
+#### AUC
+```{r}
+model.roc <- roc(response = validation$Churn.Label, predictor = as.numeric(testPred))
+#print()
+#plot(rf.roc, col = "red" , add = TRUE, print.auc.y = 0.85, print.auc = TRUE)
+plot(model.roc,col = "red",print.auc.y = 0.85, print.auc = TRUE )
+```
+
+
+
+#### overfitting
 
 
 ### splitting train test data
@@ -208,26 +282,33 @@ model.rf
 ```
 
 
+
 ```{r}
-#Predicting on the validation set and checking the Confusion Matrix.
-testPred <- predict(model.rf, train)
-#table(testPred, validation$Churn.Label)
+testPred <- predict(model.rf, newdata=validation[,-24])
+#table(testPred2, validation2$Churn.Label)
 
-confusionMatrix(as.factor(testPred),
-  as.factor(train$Churn.Label))
-
+confusionMatrix(validation$Churn.Label, testPred)
 ```
 
-
 ```{r}
-
+#Checking the variable Importance Plot
 varImpPlot(model.rf)
-
 ```
-##### overfitting???
+
+
+
+
+#### AUC
+```{r}
+model.rf.roc <- roc(response = validation$Churn.Label, predictor = as.numeric(testPred))
+#print()
+#plot(rf.roc, col = "red" , add = TRUE, print.auc.y = 0.85, print.auc = TRUE)
+plot(model.rf.roc,col = "red",print.auc.y = 0.85, print.auc = TRUE )
+```
+#
 
 ```{r}
-tg_c2 <- tg[,c("Paperless.Billing", "Tech.Support","Contract","Internet.Service","Dependents","Churn.Label")]
+tg_c2 <- tg[,c("Payment.Method", "Tech.Support","Contract","Internet.Service","Dependents","Churn.Label")]
 
 ```
 
@@ -276,8 +357,9 @@ varImpPlot(rf)
 
 ```{r}
 rf.roc <- roc(response = validation2$Churn.Label, predictor = as.numeric(testPred2))
-plot(rf.roc, col = "red" , add = TRUE, print.auc.y = 0.85, print.auc = TRUE)
-
+#print()
+#plot(rf.roc, col = "red" , add = TRUE, print.auc.y = 0.85, print.auc = TRUE)
+plot(rf.roc,col = "red",print.auc.y = 0.85, print.auc = TRUE )
 ```
 
 
@@ -288,4 +370,7 @@ cormat <- round(cor(as.numeric(tg_final)),2)
 head(cormat)
 ```
 
+ use filtered_joined_churn_df
+ ..
+ 
 ## Model Evaluation and comparsion
