@@ -1032,7 +1032,7 @@ model.rf
 
 The OOB error estimate comes to around 19.4%, so the model has around 80% out of sample accuracy for the training set. Let's check the prediction and accuracy on validation data.
 
-```{r, results='markup}
+```{r, results='markup'}
 testPred <- predict(model.rf, newdata=validation[,-24])
 #table(testPred2, validation2$Churn.Label)
 
