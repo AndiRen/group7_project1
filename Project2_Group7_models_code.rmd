@@ -902,8 +902,9 @@ Offer an additional $10 off monthly charges for customers willing to sign a 2-ye
 ### 3.4 Decision Tree Model
 
 
-**Feature selection**
-***variable importance***
+
+
+***Omit NA values***
 
 ```{r results='hide'}
 
@@ -945,6 +946,8 @@ control1 <- rfeControl(functions = rpart, # random forest
 
 ```
 
+**Label encoding the variables**
+
 ```{r results='markup'}
 
 
@@ -982,6 +985,8 @@ filtered_joined_churn_df$Payment.Method <- label$fit_transform(filtered_joined_c
 
 ```
 
+
+
 ```{r results='markup'}
 
 
@@ -993,7 +998,7 @@ filtered_joined_churn_df$Senior.Citizen <- ifelse(filtered_joined_churn_df$Senio
 
 filtered_joined_churn_df$Partner <- ifelse(filtered_joined_churn_df$Partner== "Yes",1,0)
 
-filtered_joined_churn_df$Tenure.Months <- ifelse(filtered_joined_churn_df$Tenure.Months == "Yes",1,0)
+#filtered_joined_churn_df$Tenure.Months <- ifelse(filtered_joined_churn_df$Tenure.Months == "Yes",1,0)
 
 filtered_joined_churn_df$Phone.Service <- ifelse(filtered_joined_churn_df$Phone.Service == "Yes",1,0)
 
@@ -1069,6 +1074,8 @@ b = as.factor(n["Churn.Label"])
 
 ```
 
+**Features of variable importance**
+
 ```{r results='markup'}
 
 fit_dt = rpart(Churn.Label~., data=filtered_joined_churn_df, method="class", control = list(maxdepth = 4))
@@ -1077,215 +1084,135 @@ varImp(fit_dt)
 
 ```
 
+**Tree with train test split**
 
 
 ```{r results='markup'}
 
-set.seed(1)
-kyphosisfit <- rpart(Churn.Label ~ Senior.Citizen+Partner+Dependents+Tenure.Months+Phone.Service+Online.Security, data=filtered_joined_churn_df, method="class", control = rpart.control(minsplit =1,minbucket=1, cp=0 ))
-# kyphosisfit <- rpart(Kyphosis ~ Age + Number + Start, data=filtered_joined_churn_df, method="class", control = {rpart.control list} )
-# rpart.control(maxdepth = 30, minsplit = 20, minbucket = round(minsplit/3), cp = 0.01, maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, ...)
-printcp(kyphosisfit) # display the results 
-plotcp(kyphosisfit) #
+myvars <- c("Senior.Citizen","Churn.Label", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.GB.Download","Tenure.Months","Internet.Service","Contract")
+
+
+model_df <- filtered_joined_churn_df[myvars]
+
+```
+
+**We have removed Total.Extra.Data.Charges and  Avg.Monthly.Long.Distance.Charges , as it is not significant from the test we performed above**
+
+
+```{r results='markup'}
+set.seed(56)
+library(caret)
+split_train_test <- createDataPartition(model_df$Churn.Label,p=0.7,list=FALSE)
+dtrain<- model_df[split_train_test,]
+dtest<-  model_df[-split_train_test,]
+
+# Remove Total Charges from the training dataset
+
 
 
 ```
+---
+**Train-Test data**
+---
+
+```{r results='markup'}
+
+head(dtrain)
+
+head(dtest)
+
+
+
+
+```
+
+```{r results='markup'}
+
+
+loadPkg("rpart")
+
+library(caret)
+
+library(tidyr)
+
+install.packages("dplyr")
+
+library("dplyr")
+
+library(superml)
+
+loadPkg("caret")
+
+loadPkg("rpart.plot")
+
+loadPkg("rattle")
+
+tr_fit <- rpart(Churn.Label ~., data = dtrain, method="class",na.action = na.exclude)
+rpart.plot(tr_fit)
+
+summary(tr_fit)
+
+```
+---
+---
+**From this decision tree, we can interpret the following:**
+
+**The contract variable is the most important. Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn.** 
+**Customers with DSL internet service are less likely to churn.**
+**Customers who have stayed longer than 54 months are less likely to churn. Now let’s assess the prediction accuracy of the decision tree model by investigating how well it predicts churn in the test subset. We will begin with the confustion matrix, which is a useful display of classification accuracy. It displays the following information:**
+---
+
+**true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.**
+
 
 ---
 
 ```{r results='markup'}
-summary(kyphosisfit) # detailed summary of splits
 
-# plot tree 
-plot(kyphosisfit, uniform=TRUE, main="Classification Tree for Churn")
-text(kyphosisfit, use.n=TRUE, all=TRUE, cex=.8)
+tr_prob1 <- predict(tr_fit, dtest)
+tr_pred1 <- ifelse(tr_prob1[,2] > 0.5,"Yes","No")
+table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
+
 
 ```
-
 
 ```{r results='markup'}
 
-loadPkg("caret") 
-cm = confusionMatrix( predict(kyphosisfit, type = "class"), reference = as.factor(filtered_joined_churn_df$Churn.Label) )
-print('Overall: ')
-cm$overall
-print('Class: ')
-cm$byClass
-unloadPkg("caret")
+
+tr_prob2 <- predict(tr_fit, dtrain)
+tr_pred2 <- ifelse(tr_prob2[,2] > 0.5,"Yes","No")
+tr_tab1 <- table(Predicted = tr_pred2, Actual = dtrain$Churn.Label)
+tr_tab2 <- table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
 
 ```
-
-The overall accuracy is `r round(cm$overall["Accuracy"]*100, digits=2)`%
 
 ```{r results='markup'}
 
-xkabledply(cm$table, "confusion matrix")
+
+# # Train
+# confusionMatrix(
+#   as.factor(tr_pred2),
+#   as.factor(dtrain$Churn.Label),na.action = na.pass,
+#   positive = "Yes" 
+# )
+# 
+# #Test
+# confusionMatrix(
+# as.factor(tr_pred1),
+#   as.factor(dtest$Churn.Label),
+#   positive = "Yes" 
+# )
+
+tr_acc <- sum(diag(tr_tab2))/sum(tr_tab2)
+tr_acc
 
 ```
-
-
-
-```{r results='markup'}
-
-loadPkg("rpart")
-loadPkg("caret")
-
-# kyphosisfit <- rpart(Kyphosis ~ Age + Number + Start, data=kyphosis, method="class", control = {rpart.control list} )
-# rpart.control(maxdepth = 30, minsplit = 20, minbucket = round(minsplit/3), cp = 0.01, maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, ...)
-
-# create an empty dataframe to store the results from confusion matrices
-confusionMatrixResultDf = data.frame( Depth=numeric(0), Accuracy= numeric(0), Sensitivity=numeric(0), Specificity=numeric(0), Pos.Pred.Value=numeric(0), Neg.Pred.Value=numeric(0), Precision=numeric(0), Recall=numeric(0), F1=numeric(0), Prevalence=numeric(0), Detection.Rate=numeric(0), Detection.Prevalence=numeric(0), Balanced.Accuracy=numeric(0), row.names = NULL )
-
-for (deep in 2:6) {
-  kfit <- rpart(Churn.Label ~ Senior.Citizen+Partner+Dependents+Tenure.Months+Phone.Service+Online.Security, data=filtered_joined_churn_df, method="class", control = list(maxdepth = deep) )
-  # 
-  cm = confusionMatrix( predict(kfit, type = "class"), reference = as.factor(filtered_joined_churn_df$Churn.Label)) # from caret library
-  # 
-  cmaccu = cm$overall['Accuracy']
-  # print( paste("Total Accuracy = ", cmaccu ) )
-  # 
-  cmt = data.frame(Depth=deep, Accuracy = cmaccu, row.names = NULL ) # initialize a row of the metrics 
-  cmt = cbind( cmt, data.frame( t(cm$byClass) ) ) # the dataframe of the transpose, with k valued added in front
-  confusionMatrixResultDf = rbind(confusionMatrixResultDf, cmt)
-  # print("Other metrics : ")
-}
-
-unloadPkg("caret")
-
-
-```
-
-
-```{r results='markup'}
-
-xkabledply(confusionMatrixResultDf, title="Churn Classification Trees summary with varying MaxDepth")
-
-```
-
-
-```{r results='markup'}
-
-loadPkg("rpart.plot")
-rpart.plot(kyphosisfit)
-```
-
-
-```{r results='markup'}
-
-loadPkg("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
-fancyRpartPlot(kyphosisfit)
-
-```
-
-
-
-```{r results='markup'}
-
-print("decision tree 2")
-
-```
-
-
-
-```{r results='markup'}
-
-set.seed(1)
-treefit <- rpart(Churn.Label ~ Contract+Dependents+Internet.Service+prob+Satisfaction.Score, data=filtered_joined_churn_df, method="class", control = rpart.control(minsplit =1,minbucket=1, cp=0 ))
-# treefit <- rpart(Kyphosis ~ Age + Number + Start, data=filtered_joined_churn_df, method="class", control = {rpart.control list} )
-# rpart.control(maxdepth = 30, minsplit = 20, minbucket = round(minsplit/3), cp = 0.01, maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, ...)
-printcp(treefit) # display the results 
-plotcp(treefit) #
-
-
-```
-
 ---
 
-```{r results='markup'}
-summary(treefit) # detailed summary of splits
-
-# plot tree 
-plot(treefit, uniform=TRUE, main="Classification Tree 2 for Churn")
-text(treefit, use.n=TRUE, all=TRUE, cex=.8)
-
-```
+**The overall accuracy of the model is `r round(tr_acc*100, digits=2)`%**
 
 
-```{r results='markup'}
-
-loadPkg("caret") 
-cm = confusionMatrix( predict(treefit, type = "class"), reference = as.factor(filtered_joined_churn_df$Churn.Label) )
-print('Overall: ')
-cm$overall
-print('Class: ')
-cm$byClass
-unloadPkg("caret")
-
-```
-
-The overall accuracy is `r round(cm$overall["Accuracy"]*100, digits=2)`%
-
-```{r results='markup'}
-
-xkabledply(cm$table, "confusion matrix")
-
-```
-
-
-
-```{r results='markup'}
-
-loadPkg("rpart")
-loadPkg("caret")
-
-# treefit <- rpart(Kyphosis ~ Age + Number + Start, data=kyphosis, method="class", control = {rpart.control list} )
-# rpart.control(maxdepth = 30, minsplit = 20, minbucket = round(minsplit/3), cp = 0.01, maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, ...)
-
-# create an empty dataframe to store the results from confusion matrices
-confusionMatrixResultDf = data.frame( Depth=numeric(0), Accuracy= numeric(0), Sensitivity=numeric(0), Specificity=numeric(0), Pos.Pred.Value=numeric(0), Neg.Pred.Value=numeric(0), Precision=numeric(0), Recall=numeric(0), F1=numeric(0), Prevalence=numeric(0), Detection.Rate=numeric(0), Detection.Prevalence=numeric(0), Balanced.Accuracy=numeric(0), row.names = NULL )
-
-for (deep in 2:6) {
-  kfit <- rpart(Churn.Label ~ Contract+Dependents+Internet.Service+prob+Satisfaction.Score, data=filtered_joined_churn_df, method="class", control = list(maxdepth = deep) )
-  # 
-  cm = confusionMatrix( predict(kfit, type = "class"), reference = as.factor(filtered_joined_churn_df$Churn.Label)) # from caret library
-  # 
-  cmaccu = cm$overall['Accuracy']
-  # print( paste("Total Accuracy = ", cmaccu ) )
-  # 
-  cmt = data.frame(Depth=deep, Accuracy = cmaccu, row.names = NULL ) # initialize a row of the metrics 
-  cmt = cbind( cmt, data.frame( t(cm$byClass) ) ) # the dataframe of the transpose, with k valued added in front
-  confusionMatrixResultDf = rbind(confusionMatrixResultDf, cmt)
-  # print("Other metrics : ")
-}
-
-unloadPkg("caret")
-
-
-```
-
-
-```{r results='markup'}
-
-xkabledply(confusionMatrixResultDf, title="Churn Classification Trees2 summary with varying MaxDepth")
-
-```
-
-
-```{r results='markup'}
-
-loadPkg("rpart.plot")
-rpart.plot(treefit)
-```
-
-
-```{r results='markup'}
-
-loadPkg("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
-fancyRpartPlot(treefit)
-
-```
-
-
+---
 
 
 # 4. Model Comparisons
