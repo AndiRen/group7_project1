@@ -984,15 +984,30 @@ train_label<-my_data[train_sample,2]
 test_label<-my_data[-train_sample,2]
 
 ### Linear SVM
-svm_linear1 <- train(filtered_joined_churn_df.Churn.Label ~., data = my_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10, repeats = 3), preProcess = c("center", "scale"), tuneLength = 10)
+svm_linear1 <- train(filtered_joined_churn_df.Churn.Label ~., data = train_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10, repeats = 3), preProcess = c("center", "scale"), tuneLength = 10)
 svm_linear1
 test_pred1<-predict(svm_linear1,test_data)
 confusionMatrix(table(test_pred1,test_label))
+
+### griding for obtaining best C value
+svm_grid<-train(filtered_joined_churn_df.Churn.Label~., data = train_data, method = "svmLinear", trControl=trainControl("cv", number = 10), tuneGrid = expand.grid(C=seq(0,2,length=20)), preProcess = c("center", "scale"))
+
+# plot model accuracy vs different values of cost
+plot(svm_grid)
+svm_grid$bestTune
+test_predgrid<-predict(svm_grid,test_data)
+confusionMatrix(table(test_predgrid,test_label))
 ```
 
 ```{r}
-### griding for obtaining best C value
-svm_grid<-train(filtered_joined_churn_df.Churn.Label~., data = train_data, method = "svmLinear", trControl=trainControl("cv", number = 10), tuneGrid = expand.grid(C=seq(0,2,length=20)), preProcess = c("center", "scale"))
+##### non linear SVM
+####Radial kernel
+svm_Radial<-train(filtered_joined_churn_df.Churn.Label ~., data = train_data, method = "svmRadial", trControl=trainControl(method = "repeatedcv", number = 10, repeats = 3), preProcess = c("center", "scale"), tuneLength = 10)
+
+svm_Radial
+
+svm_Radial$bestTune
+
 ```
 
 ---
