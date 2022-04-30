@@ -1181,7 +1181,107 @@ fancyRpartPlot(kyphosisfit)
 
 ```{r results='markup'}
 
+print("decision tree 2")
 
+```
+
+
+
+```{r results='markup'}
+
+set.seed(1)
+treefit <- rpart(Churn.Label ~ Contract+Dependents+Internet.Service+prob+Satisfaction.Score, data=filtered_joined_churn_df, method="class", control = rpart.control(minsplit =1,minbucket=1, cp=0 ))
+# treefit <- rpart(Kyphosis ~ Age + Number + Start, data=filtered_joined_churn_df, method="class", control = {rpart.control list} )
+# rpart.control(maxdepth = 30, minsplit = 20, minbucket = round(minsplit/3), cp = 0.01, maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, ...)
+printcp(treefit) # display the results 
+plotcp(treefit) #
+
+
+```
+
+---
+
+```{r results='markup'}
+summary(treefit) # detailed summary of splits
+
+# plot tree 
+plot(treefit, uniform=TRUE, main="Classification Tree 2 for Churn")
+text(treefit, use.n=TRUE, all=TRUE, cex=.8)
+
+```
+
+
+```{r results='markup'}
+
+loadPkg("caret") 
+cm = confusionMatrix( predict(treefit, type = "class"), reference = as.factor(filtered_joined_churn_df$Churn.Label) )
+print('Overall: ')
+cm$overall
+print('Class: ')
+cm$byClass
+unloadPkg("caret")
+
+```
+
+The overall accuracy is `r round(cm$overall["Accuracy"]*100, digits=2)`%
+
+```{r results='markup'}
+
+xkabledply(cm$table, "confusion matrix")
+
+```
+
+
+
+```{r results='markup'}
+
+loadPkg("rpart")
+loadPkg("caret")
+
+# treefit <- rpart(Kyphosis ~ Age + Number + Start, data=kyphosis, method="class", control = {rpart.control list} )
+# rpart.control(maxdepth = 30, minsplit = 20, minbucket = round(minsplit/3), cp = 0.01, maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, ...)
+
+# create an empty dataframe to store the results from confusion matrices
+confusionMatrixResultDf = data.frame( Depth=numeric(0), Accuracy= numeric(0), Sensitivity=numeric(0), Specificity=numeric(0), Pos.Pred.Value=numeric(0), Neg.Pred.Value=numeric(0), Precision=numeric(0), Recall=numeric(0), F1=numeric(0), Prevalence=numeric(0), Detection.Rate=numeric(0), Detection.Prevalence=numeric(0), Balanced.Accuracy=numeric(0), row.names = NULL )
+
+for (deep in 2:6) {
+  kfit <- rpart(Churn.Label ~ Contract+Dependents+Internet.Service+prob+Satisfaction.Score, data=filtered_joined_churn_df, method="class", control = list(maxdepth = deep) )
+  # 
+  cm = confusionMatrix( predict(kfit, type = "class"), reference = as.factor(filtered_joined_churn_df$Churn.Label)) # from caret library
+  # 
+  cmaccu = cm$overall['Accuracy']
+  # print( paste("Total Accuracy = ", cmaccu ) )
+  # 
+  cmt = data.frame(Depth=deep, Accuracy = cmaccu, row.names = NULL ) # initialize a row of the metrics 
+  cmt = cbind( cmt, data.frame( t(cm$byClass) ) ) # the dataframe of the transpose, with k valued added in front
+  confusionMatrixResultDf = rbind(confusionMatrixResultDf, cmt)
+  # print("Other metrics : ")
+}
+
+unloadPkg("caret")
+
+
+```
+
+
+```{r results='markup'}
+
+xkabledply(confusionMatrixResultDf, title="Churn Classification Trees2 summary with varying MaxDepth")
+
+```
+
+
+```{r results='markup'}
+
+loadPkg("rpart.plot")
+rpart.plot(treefit)
+```
+
+
+```{r results='markup'}
+
+loadPkg("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
+fancyRpartPlot(treefit)
 
 ```
 
