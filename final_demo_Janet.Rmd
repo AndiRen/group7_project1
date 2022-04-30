@@ -230,6 +230,8 @@ train = tg_final[indices,]
 validation = tg_final[!(indices),]
 ```
 
+The OOB error estimate comes to around 19.4%, so the model has around 80% out of sample accuracy for the training set. Let's check the prediction and accuracy on validation data.
+
 ```{r}
 #Training the RandomForest Model
 
@@ -342,6 +344,7 @@ rf<- randomForest(Churn.Label ~ ., data=train2, proximity=F,importance = F,ntree
 print(rf)
 ```
 # accuracy = 80%
+# OOB and accuracy 
 ```{r}
 testPred2 <- predict(rf, newdata=validation2[,-24])
 #table(testPred2, validation2$Churn.Label)
