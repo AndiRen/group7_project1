@@ -894,57 +894,11 @@ Offer an additional $10 off monthly charges for customers willing to sign a 2-ye
 ### 3.2 Random Forest Model
 
 ---
-### 3.3 KNN Model
-
-```{r}
-str(filtered_joined_churn_df)
-loadPkg("gmodels")
-loadPkg("FNN")
-loadPkg("caret")
-```
-
-```{r}
-xkabledplyhead(filtered_joined_churn_df)
-```
-
-```{r}
-# Check the composition of labels in the data set. 
-table(filtered_joined_churn_df$`Churn.Label`)
-table(filtered_joined_churn_df$`Churn.Label`)[2] / sum(table(filtered_joined_churn_df$`Churn.Label`))
-```
-
-```{r}
-set.seed(1)
-train_rows <- sample(1:nrow(filtered_joined_churn_df), round(0.8 * nrow(filtered_joined_churn_df), 0), replace = FALSE)
-```
-
-```{r}
-length(train_rows) / nrow(filtered_joined_churn_df)
-```
-
-```{r}
-train = filtered_joined_churn_df[train_rows, ]  
-test = filtered_joined_churn_df[-train_rows, ]
-
-nrow(train)
-nrow(test)
-
-head(train)
-head(test)
-```
-
-```{r}
-loadPkg("class")
-data_3NN = knn(train = train[, c("Senior.Citizen", "Internet.Service", "Phone.Service", "Tenure.Months", "Monthly.Charges")], test = test[, c("Senior.Citizen", "Internet.Service", "Phone.Service", "Tenure.Months", "Monthly.Charges")], cl = train[, "Churn.Label"], k = 3)
-```
-
-
-
-
 
 ### 3.3 SVM Model
 
 ```{r}
+library('caret')
 str(filtered_joined_churn_df)
 ```
 
@@ -1005,6 +959,14 @@ tuneGrid = grid,
 tuneLength = 10)
 svm_Linear_Grid
 plot(svm_Linear_Grid)
+```
+```{r}
+test_pred_grid <- predict(svm_Linear_Grid, newdata = testing)
+test_pred_grid
+```
+
+```{r}
+confusionMatrix(table(test_pred_grid, testing$filtered_joined_churn_df.Churn.Label))
 ```
 
 ---
