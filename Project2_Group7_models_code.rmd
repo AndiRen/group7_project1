@@ -43,6 +43,14 @@ library(pscl)
 library(glmnet)
 library(MLmetrics)
 library(DescTools)
+library(MASS)
+library(car)
+library(e1071)
+library(caret)
+library(cowplot)
+library(caTools)
+library(pROC)
+library(ggcorrplot)
 
 ```
 
@@ -93,7 +101,7 @@ filtered_joined_churn_df[cols] <- lapply(filtered_joined_churn_df[cols], as.fact
 
 ##################################################
 
-#Seperate into churn and non-churn groupings for later comparison
+#Separate into churn and non-churn groupings for later comparison
 only_churn <- joined_churn_df %>%
   filter(Churn.Value==1)
 
@@ -892,6 +900,171 @@ Offer an additional $10 off monthly charges for customers willing to sign a 2-ye
 ---
 
 ### 3.2 Random Forest Model
+
+#### EDA feature selection
+
+From the EDA, features we've found out will be useful and will be used in random forest model:
+
+Categorical: 
+Partner 
+Tech.Support 
+Online.Security 
+Online.Backup 
+Paperless.Billing 
+Payment.Method 
+Senior Citizen
+Contract Type
+Satisfaction Score
+Dependents
+
+Continuous:
+Tenure
+Avg. Monthly Charges
+Total.Months
+
+#### Data Preparation
+
+
+**clean categorical feature **
+
+From the previous EDA, we know that there are some categorical features that have 'No' and 'No Internet Service' or 'No Phone Service' as a category, we can make them as 'No' and clean these features.
+
+```{r,results='markup' }
+tg <- data.frame(lapply(filtered_joined_churn_df, function(x){ gsub("No internet service", "No", x)}))
+tg <- data.frame(lapply(filtered_joined_churn_df, function(x){ gsub("No phone service", "No", x)}))
+glimpse(tg)
+
+```
+
+
+**Standardizing Continuous features**
+
+Continuous festures:
+Tenure
+Avg. Monthly Charges
+Total.Months
+
+```{r,results='markup'}
+num_columns <- c("Tenure.Months", "Monthly.Charges", "Total.Charges")
+tg[num_columns] <- sapply(tg[num_columns], as.numeric)
+
+tg_int <- tg[,c("Tenure.Months", "Monthly.Charges", "Total.Charges")]
+tg_int <- data.frame(scale(tg_int))
+head(tg_int,5)
+```
+
+
+**Create discrete options of features**
+Tenure is highy correlate with target variable, therefore I am trying to create a discrete feature from tenure, where I have made different bins of tenure(which is in months) such as '0-1 year', '2-3 years', '3-4 years' etc. to show how will trnure.months actually affect whether customer choose to churn or not churn.
+
+
+```{r}
+tg <- mutate(tg, tenure_bin = Tenure.Months)
+
+tg$tenure_bin[tg$tenure_bin >=0 & tg$tenure_bin <= 12] <- '0-1 year'
+tg$tenure_bin[tg$tenure_bin > 12 & tg$tenure_bin <= 24] <- '1-2 years'
+tg$tenure_bin[tg$tenure_bin > 24 & tg$tenure_bin <= 36] <- '2-3 years'
+tg$tenure_bin[tg$tenure_bin > 36 & tg$tenure_bin <= 48] <- '3-4 years'
+tg$tenure_bin[tg$tenure_bin > 48 & tg$tenure_bin <= 60] <- '4-5 years'
+tg$tenure_bin[tg$tenure_bin > 60 & tg$tenure_bin <= 72] <- '5-6 years'
+
+tg$tenure_bin <- as.factor(tg$tenure_bin)
+
+```
+
+
+After checking the distribution of data in each tenure bin, we found that maximum number of customers have a tenure of either 0-1 years and followed by 5-6 years.
+
+```{r}
+options(repr.plot.width =6, repr.plot.height = 3)
+ggplot(tg, aes(tenure_bin, fill = tenure_bin)) + geom_bar()
+```
+
+
+**Create dummy**
+```{r, results='markup'}
+tg_c1 <- tg[,c("Paperless.Billing", "Payment.Method","tenure_bin", "Tech.Support","Online.Backup","Contract","Internet.Service","Partner","Senior.Citizen","Dependents","Churn.Label")]
+dummy<- data.frame(sapply(tg_c1,function(x) data.frame(model.matrix(~x-1,data =tg_c1))[,-1]))
+tail(dummy, n=5)
+```
+
+**Create final dataset**
+
+Creating the final dataset by combining the numeric and dummy data frames.
+
+```{r, results='markup'}
+#Combining the data
+tg_final <- cbind(tg_int,dummy)
+head(tg_final)
+tg_final$Churn.Label<- as.factor(tg_final$Churn.Label)
+head(tg_final,5)
+```
+
+#### Random Forest Model
+
+**Split data**
+
+Splitting data into train and validation
+
+```{r, results='markup'}
+#Splitting the data
+library(randomForest)
+set.seed(123)
+indices = sample.split(tg_final$Churn.Label, SplitRatio = 0.7)
+train = tg_final[indices,]
+validation = tg_final[!(indices),]
+xkablesummary(train)
+xkablesummary(validation)
+```
+
+**Train randomforest model**
+
+```{r, results='markup'}
+#Training the RandomForest Model
+
+model.rf <- randomForest(Churn.Label ~ ., data=train, proximity=F,importance = F,ntree=500,mtry=4, do.trace=F, na.action=na.roughfix)
+model.rf
+```
+
+The OOB error estimate comes to around 19.4%, so the model has around 80% out of sample accuracy for the training set. Let's check the prediction and accuracy on validation data.
+
+```{r, results='markup}
+testPred <- predict(model.rf, newdata=validation[,-24])
+#table(testPred2, validation2$Churn.Label)
+
+confusionMatrix(validation$Churn.Label, testPred)
+```
+The basic RandomForest model gives an accuracy of 79.7%( almost close enough to the OOB estimate), Sensitivity 85.3% and Specificity 62.5%.,
+
+
+**Variable Importance Plot**
+
+Below is the variable importance plot, that shows the most significant attribute in decreasing order by mean decrease in Gini. The Mean decrease Gini measures how pure the nodes are at the end of the tree. Higher the Gini Index, better is the homogeneity.
+
+```{r}
+#Checking the variable Importance Plot
+varImpPlot(model.rf)
+```
+
+From this we can see that  
+
+**Checking the AUC**
+```{r}
+model.rf.roc <- roc(response = validation$Churn.Label, predictor = as.numeric(testPred))
+#print()
+#plot(rf.roc, col = "red" , add = TRUE, print.auc.y = 0.85, print.auc = TRUE)
+plot(model.rf.roc,col = "red",print.auc.y = 0.85, print.auc = TRUE )
+```
+
+#### Brief summary of Model
+
+RandomForest:
+
+Accuracy 79.7%,
+Sensitivity 85.3%
+Specificity 62.5%
+
+
 
 ---
 
