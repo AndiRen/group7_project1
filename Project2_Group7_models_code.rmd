@@ -923,16 +923,19 @@ length(train_rows) / nrow(filtered_joined_churn_df)
 ```
 
 ```{r}
-train = bank_data[train_rows, ]  
-test = bank_data[-train_rows, ]
+train = filtered_joined_churn_df[train_rows, ]  
+test = filtered_joined_churn_df[-train_rows, ]
 
 nrow(train)
 nrow(test)
+
+head(train)
+head(test)
 ```
 
 ```{r}
 loadPkg("class")
-
+data_3NN = knn(train = train[, c("Senior.Citizen", "Internet.Service", "Phone.Service", "Tenure.Months", "Monthly.Charges")], test = test[, c("Senior.Citizen", "Internet.Service", "Phone.Service", "Tenure.Months", "Monthly.Charges")], cl = train[, "Churn.Label"], k = 3)
 ```
 
 
@@ -940,7 +943,15 @@ loadPkg("class")
 ### 3.3 SVM Model
 
 ```{r}
-summary(filtered_joined_churn_df)
+str(filtered_joined_churn_df)
+```
+
+```{r}
+view(filtered_joined_churn_df)
+```
+
+```{r}
+vars <- c("Senior.Citizen","Churn.Label", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.Long.Distance.Charges","Avg.Monthly.GB.Download","Monthly.Charges","Tenure.Months")
 ```
 
 #Libraries used
@@ -961,12 +972,14 @@ test_label<-filtered_joined_churn_df[-train_sample, 14]
 
 #Linear SVM
 ```{r}
-
 svm_linear<-train(("Churn.Label") ~., data = train_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10), preProcess = c("center", "scale"), tuneLength = 10)
 ```
 
+
+
+#no
 ```{r}
-intrain <- createDataPartition(y = filtered_joined_churn_df$Churn.Label, p= 0.7, list = FALSE)
+intrain <- createDataPartition(y = vars[[Churn.Label]], p= 0.7, list = FALSE)
 training <- heart[intrain,]
 testing <- heart[-intrain,]
 ```
@@ -988,9 +1001,7 @@ trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 svm_Linear <- train(Churn.Label ~., data = filtered_joined_churn_df, method = "svmLinear", trControl=trctrl, preProcess = c("center", "scale"), tuneLength = 10)
 ```
 
-```{r}
-str(filtered_joined_churn_df)
-```
+
 
 
 
