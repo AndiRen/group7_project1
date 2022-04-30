@@ -193,11 +193,11 @@ filtered_joined_churn_df %>%
 
 # 3. Models
 
-### 3.1 Logistic Model
+## 3.1 Logistic Model
 
 <br>
 
-#### **Satisfaction Logistic Model** 
+### 3.1.1 Satisfaction Logistic Model 
 
 <br>
 
@@ -383,7 +383,7 @@ The pseudo $r^2$ value for the Satisfaction model, using the McFadden method of 
 
 <br>
 
-#### **Full Logistic Model**
+### 3.1.2 Full Logistic Model
 
 <br>
 
@@ -563,7 +563,7 @@ The pseudo $r^2$ value for the full model, using the McFadden method of calculat
 
 ---
 
-#### **Final Logistic Model**
+### 3.1.3 Final Logistic Model
 
 <br>
 
@@ -631,9 +631,7 @@ $* (`r format(expcoeff[5], digits=6)`)^{cont2yr} * (`r format(expcoeff[6], digit
 
 **Coefficient P-values: Final Model**
 
-High p-values for the following factors:
-
-* Monthly GB (0.051)
+All p-values low.
 
 ---
 
@@ -743,7 +741,7 @@ The pseudo $r^2$ value for the final model, using the McFadden method of calcula
 
 <br>
 
-**Confusion Matrix: Final Model, 0.29 Cut Off**
+**Confusion Matrix: Final Model, 0.26 Cut Off**
 
 ```{r results='markup'}
 
@@ -770,7 +768,7 @@ The pseudo $r^2$ value for the final model, using the McFadden method of calcula
 #Get actual values of churn/non-churn
 predictions_final_model <- final_logit_model$fitted.values
 #Get predictions based off of selected cut off value
-pred_cutoff <- ifelse(predictions_final_model > 0.28, 1, 0)
+pred_cutoff <- ifelse(predictions_final_model > 0.26, 1, 0)
 
 ############################################################
 
@@ -791,7 +789,7 @@ confusion_matrix_cutoff_df <- cbind(Index, confusion_matrix_cutoff_df)
 #Rename columns to identify predicted values
 colnames(confusion_matrix_cutoff_df) <- c("", "Predicted No", "Predicted Yes", "Total")
 #Display Cut Off Confusion Matrix
-xkabledply(confusion_matrix_cutoff_df, title="Confusion Matrix for Final Model With a Cut Off Value of 0.28")
+xkabledply(confusion_matrix_cutoff_df, title="Confusion Matrix for Final Model With a Cut Off Value of 0.26")
 
 
 ########################
@@ -873,31 +871,39 @@ When the Brier Test Method is used for an unbalanced Data Set, the result is:
 
 #### **Final Logistic Model Takeaways**
 
+* Customers with avg Monthly Charge (~$65) and no other mitigating factors have a churn risk of about ~60%
 * Long-term contracts biggest factor in keeping customers with the company
 * Roughly every ~100 GB of monthly download decays odds-ratio of customer churning by 10%
-* The overall avg Monthly Charge of ~$65, has a 3.5-fold growth effect on the odds-ratio of a customer churning
-* Adjusting the cutoff significantly improves recall rate (+25%) while only suffering a minor hit to precision (-8.2%)
-* Brier Test for Log Loss (0.245) shows a model that performs reasonably well 
+* The overall avg Monthly Charge of ~$65, has a 3.6-fold growth effect on the odds-ratio of a customer churning
+* Reducing the Monthly Charge to $55 decreases the growth effect from 3.6 to 3
+* Adjusting the cutoff significantly improves recall rate (+29.1%) while only suffering a minor hit to precision (-7%)
+* Brier Test for Log Loss (0.244) shows a model that performs reasonably well 
 
-#### **Suggestion Based on Model**
+### 3.1.4 Suggestion Based on Model
 
-Offer an additional $10 off monthly charges for customers willing to sign a 2-year contract. Assuming the ideal scenario were this causes all would-be churners to stay with the company, the following benefits are gained:
+Nearly 89% of customers who churned were on month-to-month contracts. It is suggested that the company offer an additional $10 off monthly charges for customers on month-to-month contracts who would be willing to sign a 2-year contract.
 
-* Adjusted cut off saves $~364K a year by 'catching' 25% more of Churners compared to default cut off
-* Adjusted cut off loses an extra ~$91k by offering discounts to customers that wouldn't have churned
-* Value of implementing retainment plan according to model with adjusted cut off: ~$273k a year 
+For a customer who pays the avg Monthly Charge of ~$65 and who has no other mitigating factors, this would reduce the risk of churning from about ~60% to about ~5%. 
+
+Assuming the ideal scenario were all would-be churners who have month-to-month contracts take the deal and sign a 2-year contract, this theoretically reduces the number of customers who churn in this group by about ~91.7%. 
+
+This would result in the following monetary benefits to the company:
+
+* Using plan with adjusted cut off model saves ~$794K a year by retaining ~65% of would-be churners (91.7% of the 88.6% who have month-to-month contracts of the 79.6% of churners the model catches) 
+* Using plan with adjusted cut off model loses an extra ~$76k by offering discounts to customers that wouldn't have churned
+* Total value of implementing retainment plan according to model with adjusted cut off: ~$718k a year
 
 ---
 
-### 3.2 Random Forest Model
+## 3.2 Random Forest Model
 
 ---
 
-### 3.3 SVM Model
+## 3.3 SVM Model
 
 ---
 
-### 3.4 Decision Tree Model
+## 3.4 Decision Tree Model
 
 
 **Feature selection**
@@ -1288,15 +1294,15 @@ fancyRpartPlot(treefit)
 
 # 4. Model Comparisons
 
-### 4.1 Accuarcy of Models
+## 4.1 Accuarcy of Models
 
 ---
 
-### 4.2 Log Loss of Models
+## 4.2 Log Loss of Models
 
 ---
 
-### 4.3 Final Model Selection
+## 4.3 Final Model Selection
 
 ---
 
