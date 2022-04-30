@@ -935,7 +935,7 @@ filtered_joined_churn_df %>% drop_na()
 
 ```{r results='markup'}
 
-control <- rfeControl(functions = rpart, # random forest
+control1 <- rfeControl(functions = rpart, # random forest
                       method = "repeatedcv", # repeated cv
                       repeats = 5, # number of repeats
                       number = 10) # number of folds
@@ -1024,8 +1024,10 @@ n <- filtered_joined_churn_df[myvars]
 
 
 
+my <- c("Senior.Citizen", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security")
 
-myvars <- c("Senior.Citizen","Churn.Label", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.Long.Distance.Charges","Avg.Monthly.GB.Download","Monthly.Charges","Tenure.Months")
+u = filtered_joined_churn_df[my]
+
 
 
 
@@ -1036,6 +1038,10 @@ typeof(a)
 nrow(a)
 
 head(a)
+
+
+
+myvars <- c("Senior.Citizen","Churn.Label", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.Long.Distance.Charges","Avg.Monthly.GB.Download","Monthly.Charges","Tenure.Months")
 
 
 
@@ -1091,7 +1097,7 @@ plotcp(kyphosisfit) #
 summary(kyphosisfit) # detailed summary of splits
 
 # plot tree 
-plot(kyphosisfit, uniform=TRUE, main="Classification Tree for Kyphosis")
+plot(kyphosisfit, uniform=TRUE, main="Classification Tree for Churn")
 text(kyphosisfit, use.n=TRUE, all=TRUE, cex=.8)
 
 ```
@@ -1129,9 +1135,9 @@ loadPkg("caret")
 confusionMatrixResultDf = data.frame( Depth=numeric(0), Accuracy= numeric(0), Sensitivity=numeric(0), Specificity=numeric(0), Pos.Pred.Value=numeric(0), Neg.Pred.Value=numeric(0), Precision=numeric(0), Recall=numeric(0), F1=numeric(0), Prevalence=numeric(0), Detection.Rate=numeric(0), Detection.Prevalence=numeric(0), Balanced.Accuracy=numeric(0), row.names = NULL )
 
 for (deep in 2:6) {
-  kfit <- rpart(Kyphosis ~ Age + Number + Start, data=kyphosis, method="class", control = list(maxdepth = deep) )
+  kfit <- rpart(Churn.Label ~ Senior.Citizen+Partner+Dependents+Tenure.Months+Phone.Service+Online.Security, data=filtered_joined_churn_df, method="class", control = list(maxdepth = deep) )
   # 
-  cm = confusionMatrix( predict(kfit, type = "class"), reference = kyphosis[, "Kyphosis"] ) # from caret library
+  cm = confusionMatrix( predict(kfit, type = "class"), reference = as.factor(filtered_joined_churn_df$Churn.Label)) # from caret library
   # 
   cmaccu = cm$overall['Accuracy']
   # print( paste("Total Accuracy = ", cmaccu ) )
@@ -1150,7 +1156,7 @@ unloadPkg("caret")
 
 ```{r results='markup'}
 
-xkabledply(confusionMatrixResultDf, title="Kyphosis Classification Trees summary with varying MaxDepth")
+xkabledply(confusionMatrixResultDf, title="Churn Classification Trees summary with varying MaxDepth")
 
 ```
 
@@ -1168,6 +1174,15 @@ loadPkg("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from bi
 fancyRpartPlot(kyphosisfit)
 
 ```
+
+
+
+```{r results='markup'}
+
+
+
+```
+
 
 
 
