@@ -894,6 +894,48 @@ Offer an additional $10 off monthly charges for customers willing to sign a 2-ye
 ### 3.2 Random Forest Model
 
 ---
+### 3.3 KNN Model
+
+```{r}
+str(filtered_joined_churn_df)
+loadPkg("gmodels")
+loadPkg("FNN")
+loadPkg("caret")
+```
+
+```{r}
+xkabledplyhead(filtered_joined_churn_df)
+```
+
+```{r}
+# Check the composition of labels in the data set. 
+table(filtered_joined_churn_df$`Churn.Label`)
+table(filtered_joined_churn_df$`Churn.Label`)[2] / sum(table(filtered_joined_churn_df$`Churn.Label`))
+```
+
+```{r}
+set.seed(1)
+train_rows <- sample(1:nrow(filtered_joined_churn_df), round(0.8 * nrow(filtered_joined_churn_df), 0), replace = FALSE)
+```
+
+```{r}
+length(train_rows) / nrow(filtered_joined_churn_df)
+```
+
+```{r}
+train = bank_data[train_rows, ]  
+test = bank_data[-train_rows, ]
+
+nrow(train)
+nrow(test)
+```
+
+```{r}
+loadPkg("class")
+
+```
+
+
 
 ### 3.3 SVM Model
 
@@ -901,9 +943,29 @@ Offer an additional $10 off monthly charges for customers willing to sign a 2-ye
 summary(filtered_joined_churn_df)
 ```
 
+#Libraries used
 ```{r}
-library('caret')
+library(caret)
+library(class)
+```
 
+#Partition of data
+```{r}
+train_sample<-sample(1:nrow(filtered_joined_churn_df),nrow(filtered_joined_churn_df)*0.7)
+train_data<-filtered_joined_churn_df[train_sample, ]
+test_data<-filtered_joined_churn_df[-train_sample, ]
+train_label<-filtered_joined_churn_df[train_sample, 14]
+test_label<-filtered_joined_churn_df[-train_sample, 14]
+```
+
+
+#Linear SVM
+```{r}
+
+svm_linear<-train(("Churn.Label") ~., data = train_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10), preProcess = c("center", "scale"), tuneLength = 10)
+```
+
+```{r}
 intrain <- createDataPartition(y = filtered_joined_churn_df$Churn.Label, p= 0.7, list = FALSE)
 training <- heart[intrain,]
 testing <- heart[-intrain,]
@@ -927,7 +989,7 @@ svm_Linear <- train(Churn.Label ~., data = filtered_joined_churn_df, method = "s
 ```
 
 ```{r}
-
+str(filtered_joined_churn_df)
 ```
 
 
