@@ -178,7 +178,8 @@ tg_c1 <- tg[,c("Paperless.Billing", "Payment.Method","tenure_bin", "Tech.Support
 #creat dummy
 dummy<- data.frame(sapply(tg_c1,function(x) data.frame(model.matrix(~x-1,data =tg_c1))[,-1]))
 
-tail(dummy, n=20)
+xkablesummary(dummy)
+
 
 ```
 ```{r}
@@ -369,7 +370,7 @@ plot(rf.roc,col = "red",print.auc.y = 0.85, print.auc = TRUE )
 ### heatmap
 
 ```{r}
-cormat <- round(cor(as.numeric(tg_final)),2)
+cormat <- round(cor(tg_final),2)
 head(cormat)
 ```
 
