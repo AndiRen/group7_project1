@@ -1261,7 +1261,7 @@ varImp(fit_dt)
 
 ```
 
-**Tree with train test split**
+**Decision Tree with Gini**
 
 
 ```{r results='markup'}
@@ -1390,6 +1390,219 @@ tr_acc
 
 
 ---
+
+
+
+
+
+**Decision Tree with Entropy- rpart**
+
+
+```{r results='markup'}
+
+myvars <- c("Senior.Citizen","Churn.Label", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.GB.Download","Tenure.Months","Internet.Service","Contract")
+
+
+model_df <- filtered_joined_churn_df[myvars]
+
+```
+
+**We have removed Total.Extra.Data.Charges and  Avg.Monthly.Long.Distance.Charges , as it is not significant from the test we performed above**
+
+
+```{r results='markup'}
+set.seed(56)
+library(caret)
+split_train_test <- createDataPartition(model_df$Churn.Label,p=0.7,list=FALSE)
+dtrain<- model_df[split_train_test,]
+dtest<-  model_df[-split_train_test,]
+
+# Remove Total Charges from the training dataset
+
+
+
+```
+---
+**Train-Test data**
+---
+
+```{r results='markup'}
+
+head(dtrain)
+
+head(dtest)
+
+
+
+
+```
+
+```{r results='markup'}
+
+
+loadPkg("rpart")
+
+library(caret)
+
+library(tidyr)
+
+install.packages("dplyr")
+
+library("dplyr")
+
+library(superml)
+
+loadPkg("caret")
+
+loadPkg("rpart.plot")
+
+loadPkg("rattle")
+
+tr_fit <- rpart(Churn.Label ~., data = dtrain, method="class",na.action = na.exclude,parms=list(split='entropy'))
+rpart.plot(tr_fit)
+
+summary(tr_fit)
+
+```
+---
+
+**The overall accuracy of the prune tree model is `r round(tr_acc*100, digits=2)`%**
+---
+**From this decision tree, we can interpret the following:**
+
+**The contract variable is the most important. Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn.** 
+**Customers with DSL internet service are less likely to churn.**
+**Customers who have stayed longer than 54 months are less likely to churn. Now let’s assess the prediction accuracy of the decision tree model by investigating how well it predicts churn in the test subset. We will begin with the confustion matrix, which is a useful display of classification accuracy. It displays the following information:**
+---
+
+**true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.**
+
+
+---
+
+```{r results='markup'}
+
+tr_prob1 <- predict(tr_fit, dtest)
+tr_pred1 <- ifelse(tr_prob1[,2] > 0.5,"Yes","No")
+table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
+
+
+```
+
+```{r results='markup'}
+
+
+tr_prob2 <- predict(tr_fit, dtrain)
+tr_pred2 <- ifelse(tr_prob2[,2] > 0.5,"Yes","No")
+tr_tab1 <- table(Predicted = tr_pred2, Actual = dtrain$Churn.Label)
+tr_tab2 <- table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
+
+```
+
+```{r results='markup'}
+
+
+# # Train
+# confusionMatrix(
+#   as.factor(tr_pred2),
+#   as.factor(dtrain$Churn.Label),na.action = na.pass,
+#   positive = "Yes" 
+# )
+# 
+# #Test
+# confusionMatrix(
+# as.factor(tr_pred1),
+#   as.factor(dtest$Churn.Label),
+#   positive = "Yes" 
+# )
+
+tr_acc <- sum(diag(tr_tab2))/sum(tr_tab2)
+tr_acc
+
+```
+---
+
+**Prune trees**
+---
+
+**Pruning is a data compression technique in machine learning and search algorithms that reduces the size of decision trees by removing sections of the tree that are non-critical and redundant to classify instances.**
+
+```{r results='markup'}	
+
+
+
+tr_fit <- rpart(Churn.Label ~., data = dtrain, method="class",na.action = na.exclude,control = rpart.control(cp = 0.02,maxcompete = 2, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, maxdepth = 10 ))
+
+rpart.plot(tr_fit)
+
+
+
+summary(tr_fit)
+
+```
+---
+---
+**From this decision tree, we can interpret the following:**
+
+**The contract variable is the most important. Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn.** 
+**Customers with DSL internet service are less likely to churn.**
+**Customers who have stayed longer than 16 months(previously 54) are less likely to churn. Now let’s assess the prediction accuracy of the decision tree model by investigating how well it predicts churn in the test subset. We will begin with the confustion matrix, which is a useful display of classification accuracy. It displays the following information:**
+---
+
+**true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.**
+
+
+---
+
+```{r results='markup'}
+
+tr_prob1 <- predict(tr_fit, dtest)
+tr_pred1 <- ifelse(tr_prob1[,2] > 0.5,"Yes","No")
+table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
+
+
+```
+
+```{r results='markup'}
+
+
+tr_prob2 <- predict(tr_fit, dtrain)
+tr_pred2 <- ifelse(tr_prob2[,2] > 0.5,"Yes","No")
+tr_tab1 <- table(Predicted = tr_pred2, Actual = dtrain$Churn.Label)
+tr_tab2 <- table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
+
+```
+
+```{r results='markup'}
+
+
+# # Train
+# confusionMatrix(
+#   as.factor(tr_pred2),
+#   as.factor(dtrain$Churn.Label),na.action = na.pass,
+#   positive = "Yes" 
+# )
+# 
+# #Test
+# confusionMatrix(
+# as.factor(tr_pred1),
+#   as.factor(dtest$Churn.Label),
+#   positive = "Yes" 
+# )
+
+tr_acc <- sum(diag(tr_tab2))/sum(tr_tab2)
+tr_acc
+
+```
+---
+
+**The overall accuracy of the prune tree model is `r round(tr_acc*100, digits=2)`%**
+
+
+
+
+
+
 
 
 # 4. Model Comparisons
