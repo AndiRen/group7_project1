@@ -1,2 +1,3 @@
-# group7_project1
-DATS 6101 Group Project 1
+# Teleco Customer Churn Prediction
+
+### Basic Information
