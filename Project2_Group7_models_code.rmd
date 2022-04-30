@@ -31,7 +31,6 @@ options(scientific=T, digits = 3)
 
 #load packages
 library(DT)
-library(tidyverse)
 library(ezids)
 library(knitr)
 library(kableExtra)
@@ -51,6 +50,7 @@ library(cowplot)
 library(caTools)
 library(pROC)
 library(ggcorrplot)
+library(tidyverse)
 
 ```
 
@@ -949,10 +949,10 @@ Avg. Monthly Charges
 Total.Months
 
 ```{r,results='markup'}
-num_columns <- c("Tenure.Months", "Monthly.Charges", "Total.Charges")
+num_columns <- c("Tenure.Months", "Monthly.Charges", "Total.Extra.Data.Charges")
 tg[num_columns] <- sapply(tg[num_columns], as.numeric)
 
-tg_int <- tg[,c("Tenure.Months", "Monthly.Charges", "Total.Charges")]
+tg_int <- tg[,c("Tenure.Months", "Monthly.Charges", "Total.Extra.Data.Charges")]
 tg_int <- data.frame(scale(tg_int))
 head(tg_int,5)
 ```
