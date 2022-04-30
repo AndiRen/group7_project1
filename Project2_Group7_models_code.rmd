@@ -1115,6 +1115,8 @@ unloadPkg("caret")
 
 ```
 
+The overall accuracy is `r round(cm$overall["Accuracy"]*100, digits=2)`%
+
 ```{r results='markup'}
 
 xkabledply(cm$table, "confusion matrix")
