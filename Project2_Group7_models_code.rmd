@@ -572,7 +572,6 @@ To build a better model for the final version, we will drop those variables that
 * `Dependents`
 * `Phone Service`
 * `Contract`
-* `Paperless Billing`
 * `Monthly Charges`
 * `Monthly GB`
 
@@ -600,7 +599,7 @@ To build a better model for the final version, we will drop those variables that
 #+ Tenure.Months, partner
 
 #Build model
-final_logit_model <- glm(Churn.Label ~ Dependents + Phone.Service + Contract + Paperless.Billing + Monthly.Charges + Avg.Monthly.GB.Download, data=filtered_joined_churn_df, family="binomial")
+final_logit_model <- glm(Churn.Label ~ Dependents + Phone.Service + Contract + Monthly.Charges + Avg.Monthly.GB.Download, data=filtered_joined_churn_df, family="binomial")
 #summary(final_logit_model)
 xkabledply(final_logit_model, title="Churn.Label ~ All Factors")
 
@@ -622,7 +621,7 @@ xkabledply(as.table(expcoeff), title='Growth and Decay Factors After Exponentiat
 
 $\frac{p}{q} = `r format(expcoeff[1], digits=6)` * (`r format(expcoeff[2], digits=6)`)^{dependents} * (`r format(expcoeff[3], digits=6)`)^{phone} * (`r format(expcoeff[4], digits=6)`)^{cont1yr}$
 
-$* (`r format(expcoeff[5], digits=6)`)^{cont2yr} * (`r format(expcoeff[6], digits=6)`)^{paperless} * (`r format(expcoeff[7], digits=6)`)^{monthlyCharge} * (`r format(expcoeff[8], digits=6)`)^{monthlyGB}$
+$* (`r format(expcoeff[5], digits=6)`)^{cont2yr} * (`r format(expcoeff[6], digits=6)`)^{monthlyCharge} * (`r format(expcoeff[7], digits=6)`)^{monthlyGB}$
 
 <br>
 
@@ -766,12 +765,12 @@ The pseudo $r^2$ value for the final model, using the McFadden method of calcula
 #0.361
 #0.263
 #0.265
-#0.29 -- 80% recall
+#0.28 -- 80% recall
 
 #Get actual values of churn/non-churn
 predictions_final_model <- final_logit_model$fitted.values
 #Get predictions based off of selected cut off value
-pred_cutoff <- ifelse(predictions_final_model > 0.29, 1, 0)
+pred_cutoff <- ifelse(predictions_final_model > 0.28, 1, 0)
 
 ############################################################
 
@@ -792,7 +791,7 @@ confusion_matrix_cutoff_df <- cbind(Index, confusion_matrix_cutoff_df)
 #Rename columns to identify predicted values
 colnames(confusion_matrix_cutoff_df) <- c("", "Predicted No", "Predicted Yes", "Total")
 #Display Cut Off Confusion Matrix
-xkabledply(confusion_matrix_cutoff_df, title="Confusion Matrix for Final Model With a Cut Off Value of 0.29")
+xkabledply(confusion_matrix_cutoff_df, title="Confusion Matrix for Final Model With a Cut Off Value of 0.28")
 
 
 ########################
@@ -874,10 +873,9 @@ When the Brier Test Method is used for an unbalanced Data Set, the result is:
 
 #### **Final Logistic Model Takeaways**
 
-* Avg. Monthly GB (p-val: 0.051) kept because it connected closely with reasons customers gave for leaving 
 * Long-term contracts biggest factor in keeping customers with the company
 * Roughly every ~100 GB of monthly download decays odds-ratio of customer churning by 10%
-* The overall avg Monthly Charge of ~$65, has a 3-fold growth effect on the odds-ratio of a customer churning
+* The overall avg Monthly Charge of ~$65, has a 3.5-fold growth effect on the odds-ratio of a customer churning
 * Adjusting the cutoff significantly improves recall rate (+25%) while only suffering a minor hit to precision (-8.2%)
 * Brier Test for Log Loss (0.245) shows a model that performs reasonably well 
 
