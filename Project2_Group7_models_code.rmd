@@ -969,6 +969,32 @@ test_pred_grid
 confusionMatrix(table(test_pred_grid, testing$filtered_joined_churn_df.Churn.Label))
 ```
 
+
+#2nd Method
+```{r}
+### Libraries used
+library(caret)
+library(class)
+
+## Partition of data
+train_sample<-createDataPartition(y = my_data$filtered_joined_churn_df.Churn.Label, p= 0.7, list = FALSE)
+train_data<-my_data[train_sample, ]
+test_data<-my_data[-train_sample, ]
+train_label<-my_data[train_sample,2]
+test_label<-my_data[-train_sample,2]
+
+### Linear SVM
+svm_linear1 <- train(filtered_joined_churn_df.Churn.Label ~., data = my_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10, repeats = 3), preProcess = c("center", "scale"), tuneLength = 10)
+svm_linear1
+test_pred1<-predict(svm_linear1,test_data)
+confusionMatrix(table(test_pred1,test_label))
+```
+
+```{r}
+### griding for obtaining best C value
+svm_grid<-train(filtered_joined_churn_df.Churn.Label~., data = train_data, method = "svmLinear", trControl=trainControl("cv", number = 10), tuneGrid = expand.grid(C=seq(0,2,length=20)), preProcess = c("center", "scale"))
+```
+
 ---
 
 ### 3.4 Decision Tree Model
