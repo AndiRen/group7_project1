@@ -940,6 +940,8 @@ data_3NN = knn(train = train[, c("Senior.Citizen", "Internet.Service", "Phone.Se
 
 
 
+
+
 ### 3.3 SVM Model
 
 ```{r}
@@ -950,38 +952,21 @@ str(filtered_joined_churn_df)
 view(filtered_joined_churn_df)
 ```
 
-```{r}
-vars <- c("Senior.Citizen","Churn.Label", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.Long.Distance.Charges","Avg.Monthly.GB.Download","Monthly.Charges","Tenure.Months")
-```
-
-#Libraries used
-```{r}
-library(caret)
-library(class)
-```
-
-#Partition of data
-```{r}
-train_sample<-sample(1:nrow(filtered_joined_churn_df),nrow(filtered_joined_churn_df)*0.7)
-train_data<-filtered_joined_churn_df[train_sample, ]
-test_data<-filtered_joined_churn_df[-train_sample, ]
-train_label<-filtered_joined_churn_df[train_sample, 14]
-test_label<-filtered_joined_churn_df[-train_sample, 14]
-```
 
 
-#Linear SVM
 ```{r}
-svm_linear<-train(("Churn.Label") ~., data = train_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10), preProcess = c("center", "scale"), tuneLength = 10)
+my_data <- data.frame(filtered_joined_churn_df$Senior.Citizen,filtered_joined_churn_df$Churn.Label,filtered_joined_churn_df$Partner,filtered_joined_churn_df$Dependents,filtered_joined_churn_df$Tenure.Months,filtered_joined_churn_df$Phone.Service,filtered_joined_churn_df$Online.Security,filtered_joined_churn_df$Online.Backup,filtered_joined_churn_df$Tech.Support,filtered_joined_churn_df$Paperless.Billing,filtered_joined_churn_df$Unlimited.Data,filtered_joined_churn_df$Avg.Monthly.Long.Distance.Charges,filtered_joined_churn_df$Avg.Monthly.GB.Download,filtered_joined_churn_df$Monthly.Charges)
+
+str(my_data)
 ```
 
 
 
-#no
+
 ```{r}
-intrain <- createDataPartition(y = vars[[Churn.Label]], p= 0.7, list = FALSE)
-training <- heart[intrain,]
-testing <- heart[-intrain,]
+intrain <- createDataPartition(y = my_data$filtered_joined_churn_df.Churn.Label, p= 0.7, list = FALSE)
+training <- my_data[intrain,]
+testing <- my_data[-intrain,]
 ```
 
 
@@ -998,10 +983,13 @@ trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
 
 ```{r}
-svm_Linear <- train(Churn.Label ~., data = filtered_joined_churn_df, method = "svmLinear", trControl=trctrl, preProcess = c("center", "scale"), tuneLength = 10)
+svm_Linear <- train(filtered_joined_churn_df.Churn.Label ~., data = my_data, method = "svmLinear", trControl=trctrl, preProcess = c("center", "scale"), tuneLength = 10)
+svm_Linear
 ```
 
+```{r}
 
+```
 
 
 
