@@ -31,7 +31,6 @@ options(scientific=T, digits = 3)
 
 #load packages
 library(DT)
-library(tidyverse)
 library(ezids)
 library(knitr)
 library(kableExtra)
@@ -51,6 +50,7 @@ library(cowplot)
 library(caTools)
 library(pROC)
 library(ggcorrplot)
+library(tidyverse)
 
 ```
 
