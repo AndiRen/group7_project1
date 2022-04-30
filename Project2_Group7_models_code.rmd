@@ -592,7 +592,17 @@ varImp(fit_dt)
 
 
 
+```{r results='markup'}
 
+set.seed(1)
+kyphosisfit <- rpart(Churn.Label ~ Senior.Citizen+Partner+Dependents+Tenure.Months+Phone.Service+Online.Security, data=filtered_joined_churn_df, method="class", control = list(maxdepth = 4) )
+# kyphosisfit <- rpart(Kyphosis ~ Age + Number + Start, data=filtered_joined_churn_df, method="class", control = {rpart.control list} )
+# rpart.control(maxdepth = 30, minsplit = 20, minbucket = round(minsplit/3), cp = 0.01, maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, ...)
+printcp(kyphosisfit) # display the results 
+plotcp(kyphosisfit) #
+
+
+```
 
 ---
 
