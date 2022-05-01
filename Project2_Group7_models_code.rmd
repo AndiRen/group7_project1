@@ -1459,9 +1459,27 @@ tr_acc
 
 
 ---
+```{r results='markup'}
+library(pROC)
+ROC_rf <- roc(dtest$Churn.Label, tr_prob1[,2])
 
 
+ROC_rf_auc <- auc(ROC_rf)
 
+plot(ROC_rf, col = "green", main = "ROC Curve for the decision tree with gini")
+
+
+paste("Accuracy decision tree with gini: ", mean(dtest$Churn.Labe == round(tr_prob1[,2], digits = 0)))
+
+paste("Area under curve for decision tree with gini is: ", ROC_rf_auc)
+
+
+```
+
+**The overall accuracy of the decision tree with gini model is `r round(tr_acc*100, digits=2)`%**
+**The AUC of the decision tree with gini  model is `r round(ROC_rf_auc, digits=2)`**
+
+---
 
 
 **Decision Tree with Entropy- rpart**
@@ -1606,6 +1624,9 @@ paste("Area under curve for decision tree with entropy is: ", ROC_rf_auc)
 
 
 ```
+
+**The overall accuracy of the decision tree with entropy model is `r round(tr_acc*100, digits=2)`%**
+**The AUC of the decision tree with entropy model is `r round(ROC_rf_auc, digits=2)`**
 
 ---
 
