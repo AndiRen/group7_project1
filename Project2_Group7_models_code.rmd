@@ -1108,6 +1108,10 @@ test_label<-my_data[-train_sample,2]
 ### Linear SVM
 svm_linear <- train(filtered_joined_churn_df.Churn.Label ~., data = train_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10, repeats = 3), preProcess = c("center", "scale"), tuneLength = 10)
 svm_linear
+```
+
+```{r}
+### Confusion Matrix
 test_pred<-predict(svm_linear,test_data)
 confusionMatrix(table(test_pred,test_label))
 ```
@@ -1123,6 +1127,22 @@ plot(svm_grid)
 svm_grid$bestTune
 test_predgrid<-predict(svm_grid,test_data)
 confusionMatrix(table(test_predgrid,test_label))
+
+```
+
+```{r results='markup'}
+library(pROC)
+ROC_rf1 <- roc(test_data$filtered_joined_churn_df.Churn.Label, test_pred2[,2])
+ROC_rf_auc1 <- auc(ROC_rf1)
+
+plot(ROC_rf1, col = "green", main = "ROC Curve for the prune tree")
+
+
+paste("Accuracy : ", mean(test_data$filtered_joined_churn_df.Churn.Label == round(test_pred[,2], digits = 0)))
+
+paste("Area under curve for prune tree model is: ", ROC_rf_auc1)
+
+
 ```
 
 ---
@@ -1662,6 +1682,8 @@ paste("Area under curve for prune tree model is: ", ROC_rf_auc)
 
 
 ```
+
+
 ---
 
 **The overall accuracy of the prune tree model is `r round(tr_acc*100, digits=2)`%**
