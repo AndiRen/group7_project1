@@ -898,7 +898,6 @@ Offer an additional $10 off monthly charges for customers willing to sign a 2-ye
 ### 3.3 SVM Model
 
 ```{r}
-library('caret')
 str(filtered_joined_churn_df)
 ```
 
@@ -930,10 +929,10 @@ test_label<-my_data[-train_sample,2]
 
 ```{r}
 ### Linear SVM
-svm_linear1 <- train(filtered_joined_churn_df.Churn.Label ~., data = train_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10, repeats = 3), preProcess = c("center", "scale"), tuneLength = 10)
-svm_linear1
-test_pred1<-predict(svm_linear1,test_data)
-confusionMatrix(table(test_pred1,test_label))
+svm_linear <- train(filtered_joined_churn_df.Churn.Label ~., data = train_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10, repeats = 3), preProcess = c("center", "scale"), tuneLength = 10)
+svm_linear
+test_pred<-predict(svm_linear,test_data)
+confusionMatrix(table(test_pred,test_label))
 ```
 
 ```{r}
