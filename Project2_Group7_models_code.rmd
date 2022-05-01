@@ -1131,18 +1131,11 @@ confusionMatrix(table(test_predgrid,test_label))
 ```
 
 ```{r results='markup'}
+### ROC Curve
 library(pROC)
-ROC_rf1 <- roc(test_data$filtered_joined_churn_df.Churn.Label, test_pred2[,2])
-ROC_rf_auc1 <- auc(ROC_rf1)
-
-plot(ROC_rf1, col = "green", main = "ROC Curve for the prune tree")
-
-
-paste("Accuracy : ", mean(test_data$filtered_joined_churn_df.Churn.Label == round(test_pred[,2], digits = 0)))
-
-paste("Area under curve for prune tree model is: ", ROC_rf_auc1)
-
-
+roc_svm_test <-plot(roc(as.numeric(test_data$filtered_joined_churn_df.Churn.Label),as.numeric(test_pred)),main="Comparaison ",col="#1c61b6")
+plot(roc_svm_test, add = TRUE,col = "red", print.auc=TRUE, print.auc.x = 0.5, print.auc.y = 0.3)
+legend(0.3, 0.2, legend = c("test-svm"), lty = c(1), col = c("blue"))
 ```
 
 ---
