@@ -729,18 +729,18 @@ plot(roc_data)
 
 ```{r, comment=NA}
 #calculate McFadden statistics, the pseudo r^2
-all_pr2 = pR2(final_logit_model)
-#all_pr2[4]
+final_pr2 = pR2(final_logit_model)
+#final_pr2[4]
 
 ```
 
-The pseudo $r^2$ value for the final model, using the McFadden method of calculation, is `r all_pr2[4]`. This means that `r round(all_pr2[4], digits=3)*100`% of the variance seen in the data is accounted for by this model.
+The pseudo $r^2$ value for the final model, using the McFadden method of calculation, is `r final_pr2[4]`. This means that `r round(final_pr2[4], digits=3)*100`% of the variance seen in the data is accounted for by this model.
 
 ---
 
 **AIC/BIC and Deviance: Final Model**
 
-* The AIC of the final model is: `r all_logit_model$aic` 
+* The AIC of the final model is: `r final_logit_model$aic` 
 * The Residual Deviance of the final model is: `r final_logit_model$deviance` 
 
 ---
