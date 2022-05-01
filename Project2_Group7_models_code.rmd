@@ -1602,7 +1602,7 @@ ROC_rf <- roc(dtest$Churn.Label, tr_prob1[,2])
 
 ROC_rf_auc <- auc(ROC_rf)
 
-plot(ROC_rf, col = "green", main = "ROC Curve for prune tree")
+plot(ROC_rf, col = "green", main = "ROC Curve for the prune tree")
 
 
 paste("Accuracy : ", mean(dtest$Churn.Labe == round(tr_prob1[,2], digits = 0)))
