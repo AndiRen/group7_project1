@@ -1126,6 +1126,8 @@ head(dtest)
 
 ```
 
+
+
 ```{r results='markup'}
 
 
@@ -1307,8 +1309,8 @@ summary(tr_fit)
 ```
 ---
 
-**The overall accuracy of the prune tree model is `r round(tr_acc*100, digits=2)`%**
----
+**The overall accuracy of the tree model with entropy is `r round(tr_acc*100, digits=2)`%**
+
 **From this decision tree, we can interpret the following:**
 
 **The contract variable is the most important. Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn.** 
