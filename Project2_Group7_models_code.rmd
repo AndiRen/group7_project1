@@ -1126,9 +1126,13 @@ svm_grid<-train(filtered_joined_churn_df.Churn.Label~., data = train_data, metho
 plot(svm_grid)
 svm_grid$bestTune
 test_predgrid<-predict(svm_grid,test_data)
-confusionMatrix(table(test_predgrid,test_label))
-
 ```
+
+```{r}
+# Accuracy after finding best parameter
+confusionMatrix(table(test_predgrid,test_label))
+```
+
 
 ```{r results='markup'}
 ### ROC Curve
