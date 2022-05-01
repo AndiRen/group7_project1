@@ -1614,7 +1614,7 @@ paste("Area under curve for prune tree model is: ", ROC_rf_auc)
 ---
 
 **The overall accuracy of the prune tree model is `r round(tr_acc*100, digits=2)`%**
-
+**The AUC of the prune tree model is `r round(ROC_rf_auc, digits=2)`**
 
 
 
