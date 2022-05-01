@@ -1417,6 +1417,23 @@ tr_acc <- sum(diag(tr_tab2))/sum(tr_tab2)
 tr_acc
 
 ```
+
+```{r results='markup'}
+library(pROC)
+ROC_rf <- roc(dtest$Churn.Label, tr_prob1[,2])
+
+
+ROC_rf_auc <- auc(ROC_rf)
+
+plot(ROC_rf, col = "green", main = "ROC Curve for prune tree")
+
+
+paste("Accuracy : ", mean(dtest$Churn.Labe == round(tr_prob1[,2], digits = 0)))
+
+paste("Area under curve for prune tree model is: ", ROC_rf_auc)
+
+
+```
 ---
 
 **The overall accuracy of the prune tree model is `r round(tr_acc*100, digits=2)`%**
