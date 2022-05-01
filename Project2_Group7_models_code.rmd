@@ -1113,7 +1113,7 @@ svm_linear
 ```{r}
 ### Confusion Matrix
 test_pred<-predict(svm_linear,test_data)
-confusionMatrix(table(test_pred,test_label))
+confusionMatrix(table(test_pred,test_data$filtered_joined_churn_df.Churn.Label))
 ```
 
 ```{r}
@@ -1130,7 +1130,7 @@ test_predgrid<-predict(svm_grid,test_data)
 
 ```{r}
 # Accuracy after finding best parameter
-confusionMatrix(table(test_predgrid,test_label))
+confusionMatrix(table(test_predgrid,test_data$filtered_joined_churn_df.Churn.Label))
 ```
 
 
