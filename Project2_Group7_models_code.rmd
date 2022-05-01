@@ -906,8 +906,6 @@ str(filtered_joined_churn_df)
 view(filtered_joined_churn_df)
 ```
 
-
-
 ```{r}
 my_data <- data.frame(filtered_joined_churn_df$Senior.Citizen,filtered_joined_churn_df$Churn.Label,filtered_joined_churn_df$Partner,filtered_joined_churn_df$Dependents,filtered_joined_churn_df$Tenure.Months,filtered_joined_churn_df$Phone.Service,filtered_joined_churn_df$Online.Security,filtered_joined_churn_df$Online.Backup,filtered_joined_churn_df$Tech.Support,filtered_joined_churn_df$Paperless.Billing,filtered_joined_churn_df$Unlimited.Data,filtered_joined_churn_df$Avg.Monthly.Long.Distance.Charges,filtered_joined_churn_df$Avg.Monthly.GB.Download,filtered_joined_churn_df$Monthly.Charges)
 
@@ -915,99 +913,40 @@ str(my_data)
 ```
 
 
-
-
-```{r}
-intrain <- createDataPartition(y = my_data$filtered_joined_churn_df.Churn.Label, p= 0.7, list = FALSE)
-training <- my_data[intrain,]
-testing <- my_data[-intrain,]
-```
-
-
-#Checking the dimensions of our training data frame and testing data frame
-```{r}
-dim(training); 
-dim(testing);
-```
-
-
-```{r}
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
-```
-
-
-```{r}
-svm_Linear <- train(filtered_joined_churn_df.Churn.Label ~., data = my_data, method = "svmLinear", trControl=trctrl, preProcess = c("center", "scale"), tuneLength = 10)
-svm_Linear
-```
-
-```{r}
-test_pred <- predict(svm_Linear, newdata = testing)
-test_pred
-```
-
-```{r}
-confusionMatrix(table(test_pred, testing$filtered_joined_churn_df.Churn.Label))
-```
-
-```{r}
-grid <- expand.grid(C = c(0,0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2,5))
-svm_Linear_Grid <- train(filtered_joined_churn_df.Churn.Label ~., data = my_data, method = "svmLinear",
-trControl=trctrl,
-preProcess = c("center", "scale"),
-tuneGrid = grid,
-tuneLength = 10)
-svm_Linear_Grid
-plot(svm_Linear_Grid)
-```
-```{r}
-test_pred_grid <- predict(svm_Linear_Grid, newdata = testing)
-test_pred_grid
-```
-
-```{r}
-confusionMatrix(table(test_pred_grid, testing$filtered_joined_churn_df.Churn.Label))
-```
-
-
-#2nd Method
 ```{r}
 ### Libraries used
 library(caret)
 library(class)
+```
 
+```{r}
 ## Partition of data
 train_sample<-createDataPartition(y = my_data$filtered_joined_churn_df.Churn.Label, p= 0.7, list = FALSE)
 train_data<-my_data[train_sample, ]
 test_data<-my_data[-train_sample, ]
 train_label<-my_data[train_sample,2]
 test_label<-my_data[-train_sample,2]
+```
 
+```{r}
 ### Linear SVM
 svm_linear1 <- train(filtered_joined_churn_df.Churn.Label ~., data = train_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10, repeats = 3), preProcess = c("center", "scale"), tuneLength = 10)
 svm_linear1
 test_pred1<-predict(svm_linear1,test_data)
 confusionMatrix(table(test_pred1,test_label))
+```
 
+```{r}
 ### griding for obtaining best C value
 svm_grid<-train(filtered_joined_churn_df.Churn.Label~., data = train_data, method = "svmLinear", trControl=trainControl("cv", number = 10), tuneGrid = expand.grid(C=seq(0,2,length=20)), preProcess = c("center", "scale"))
+```
 
+```{r}
 # plot model accuracy vs different values of cost
 plot(svm_grid)
 svm_grid$bestTune
 test_predgrid<-predict(svm_grid,test_data)
 confusionMatrix(table(test_predgrid,test_label))
-```
-
-```{r}
-##### non linear SVM
-####Radial kernel
-svm_Radial<-train(filtered_joined_churn_df.Churn.Label ~., data = train_data, method = "svmRadial", trControl=trainControl(method = "repeatedcv", number = 10, repeats = 3), preProcess = c("center", "scale"), tuneLength = 10)
-
-svm_Radial
-
-svm_Radial$bestTune
-
 ```
 
 ---
