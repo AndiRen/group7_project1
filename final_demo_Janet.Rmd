@@ -377,4 +377,4 @@ head(cormat)
  use filtered_joined_churn_df
  ..
  
-## Model Evaluation and comparsion
+## Model Evaluation and tunning?
