@@ -1,7 +1,7 @@
 ---
 title: "Group 7 Project 2: Models"
-author: "Andy Christian, Yaxin (Janet) Zhuang, Adhithya Kiran"
-date: "4/20/2022"
+author: "Andy Christian, Yaxin (Janet) Zhuang, Adhithya Kiran, Yasaswi Kasaraneni"
+date: "5/01/2022"
 output:
   html_document:
     code_folding: hide
@@ -176,28 +176,87 @@ Ready to continue...
 
 <br>
 
+---
+
+# 1. Quick Review of Data Set
+
+This data set is a fictional data set provided by IBM. It includes the demographic information on the customers of a telecommunications company, data on the services each customer used, charges paid (etc.), as well as whether the customer “churned” or not – meaning, whether the customer left the company in the past month. It also includes data on the reason(s) each customer who did leave gave for leaving.
+
+<br>
+
 #### Data Set Structure
 
-```{r}
+```{r, comments=NA}
 str(filtered_joined_churn_df)
 ```
 
 <br>
 
-#### Data Set Decriptive Statistics
+From the graph below, we see that around 27% of customer left the platform within the last month.
+
 
 ```{r}
+options(repr.plot.width = 6, repr.plot.height = 4)
 filtered_joined_churn_df %>%
-  describe()
+group_by(Churn.Label) %>%
+summarise(Count = n())%>%
+mutate(percent = prop.table(Count)*100)%>%
+ggplot(aes(reorder(Churn.Label, -percent), percent), fill = Churn)+
+geom_col(fill = c("#FC4E07", "#E7B800"))+
+geom_text(aes(label = sprintf("%.2f%%", percent)), hjust = 0.01,vjust = -0.5, size =3)+
+theme_bw()+  
+xlab("Churn") +
+ylab("Percent")+
+ggtitle("Churn Percent")
+
+```
+
+<br>
+
+The graph below details the reasons customers gave for leaving.
+Although some customers may have selected the same reason for leaving, they may have categorized how they associated that reason differently. The churn category is used as a fill to provide further detail in understanding the customer perspective.
+We will use these reasons to help us formulate our questions, select appropriate variables to investigate, and contextualize the results:
+
+```{r}
+joined_churn_df %>%
+  filter(!is.na(Churn.Category)) %>%
+  ggplot() +
+  geom_bar(mapping=aes(y=Churn.Reason, fill=Churn.Category), show.legend=TRUE) +
+  labs(title='Reasons for Leaving by Answer', y=('Reason'), x=('Count')) +
+  theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
 
----
+# 2. Quick Review of EDA and SMART QUESTIONS
 
-# 1. Review of EDA and SMART Questions
+Answering SMART Question 1
 
-# 2. Graphs of Variables
+1. Which of the variables in the data set show a statistical difference between the churn and non-churn groupings?
+
+To answer this question, we divided the data into churn and non-churn groups, then visually explored how the data set’s variables differed when divided into these groups. We then tested the differences using 2-sample t-tests, goodness of fit chi squared tests, and chi squared tests of independence. From this we determined that the following 15 variables showed a statistical difference between the churn and non-churn groups:
+
+* `Tenure`
+* `Avg. Monthly Charges`
+* `Avg. Monthly GB Download`
+* `Senior Citizen`
+* `Partner`
+* `Dependents`
+* `Internet Service`
+* `Online Security`
+* `Online Backup`
+* `Tech Support`
+* `Contract Type`
+* `Paperless Billing`
+* `Payment Method`
+* `Satisfaction Score`
+* `Unlimited Data`
+
+Smart Questions to answer with modeling:
+
+* Customers with what behaviors and conditions would likely leave the platform?
+* What services are important to deliver to a customer to keep them with the company?
+
 
 # 3. Models
 
@@ -1776,18 +1835,26 @@ paste("Area under curve for prune tree model is: ", ROC_rf_auc)
 
 ## 4.1 Accuarcy of Models
 
----
+The Prune Tree Model had the best combined accuracy and AUC
 
-## 4.2 Log Loss of Models
+*More to add in summary paper*
 
 ---
 
 ## 4.3 Final Model Selection
 
+The Prune tree is selected as the final model
+
+*More to add in summary paper*
+
 ---
 
 # 5. Answering SMART Questions
 
+*More to add in summary paper*
+
 ---
 
 # 6. Summary
+
+*More to add in summary paper*
