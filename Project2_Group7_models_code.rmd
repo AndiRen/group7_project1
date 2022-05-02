@@ -1030,7 +1030,7 @@ model.rf <- randomForest(Churn.Label ~ ., data=train, proximity=F,importance = F
 model.rf
 ```
 
-The OOB error estimate comes to around 19.4%, so the model has around 80% out of sample accuracy for the training set. Let's check the prediction and accuracy on validation data.
+The OOB error estimate comes to around 20%, so the model has around 80% out of sample accuracy for the training set. Let's check the prediction and accuracy on validation data.
 
 ```{r, results='markup'}
 testPred <- predict(model.rf, newdata=validation[,-24])
@@ -1038,7 +1038,7 @@ testPred <- predict(model.rf, newdata=validation[,-24])
 
 confusionMatrix(validation$Churn.Label, testPred)
 ```
-The basic RandomForest model gives an accuracy of 79.7%( almost close enough to the OOB estimate), Sensitivity 85.3% and Specificity 62.5%.,
+The basic RandomForest model gives an accuracy of 80.3%( almost close enough to the OOB estimate), Sensitivity 85.3% and Specificity 64%.,
 
 
 **Variable Importance Plot**
@@ -1050,7 +1050,7 @@ Below is the variable importance plot, that shows the most significant attribute
 varImpPlot(model.rf)
 ```
 
-From this we can see that  
+  
 
 **Checking the AUC**
 ```{r}
@@ -1064,9 +1064,9 @@ plot(model.rf.roc,col = "red",print.auc.y = 0.85, print.auc = TRUE )
 
 RandomForest:
 
-Accuracy 79.7%,
+Accuracy 80.3%,
 Sensitivity 85.3%
-Specificity 62.5%
+Specificity 64%
 
 
 
