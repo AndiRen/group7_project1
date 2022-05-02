@@ -1149,8 +1149,16 @@ legend(0.3, 0.2, legend = c("test-svm"), lty = c(1), col = c("blue"))
 
 
 
-
+---
 ***Omit NA values***
+---
+
+***We have also tried to build the decision tree mode.A decision tree is a type of supervised machine learning used to categorize or make predictions based on how a previous set of questions were answered. The model is a form of supervised learning, meaning that the model is trained and tested on a set of data that contains the desired categorization***
+
+***before building the actual tree , since the data is not so clean, we have tried to clean categorical variables, changing into factors.standardized numerical variables. I have also cleaned the na values***
+***we have a used label encoding for categorical variables.***
+
+***We got the insight from our previous eda that tota extra data charges , avg monthly long dist chanrges has null on whether a customer to churn or not so we removed those variables from the model building.***
 
 ```{r results='hide'}
 
@@ -1192,7 +1200,7 @@ control1 <- rfeControl(functions = rpart, # random forest
 
 ```
 
-**Label encoding the variables**
+**Label encoding the categorical variables**
 
 ```{r results='markup'}
 
@@ -1424,6 +1432,12 @@ table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
 
 ```
 
+---
+
+***From this confusion matrix, we can see that the model performs well at predicting non-churning customers (1354 correct vs. 208 incorrect) and  predicting churning customers 341 correct vs. 209 incorrect).***
+
+---
+
 ```{r results='markup'}
 
 
@@ -1477,6 +1491,14 @@ paste("Area under curve for decision tree with gini is: ", ROC_rf_auc)
 
 
 ```
+
+---
+
+**This is the auc roc curve for the decision tree with gini parameter**
+
+***The Area Under the Curve (AUC) is the measure of the ability of a classifier to distinguish between classes and is used as a summary of the ROC curve. The higher the AUC, the better the performance of the model at distinguishing between the positive and negative classes.***
+
+---
 
 **The overall accuracy of the decision tree with gini model is `r round(tr_acc*100, digits=2)`%**
 **The AUC of the decision tree with gini  model is `r round(ROC_rf_auc, digits=2)`**
@@ -1629,13 +1651,27 @@ paste("Area under curve for decision tree with entropy is: ", ROC_rf_auc)
 
 **The overall accuracy of the decision tree with entropy model is `r round(tr_acc*100, digits=2)`%**
 **The AUC of the decision tree with entropy model is `r round(ROC_rf_auc, digits=2)`**
+---
+***We have build the decision tree with entropy parameter but surprisingly it gave the same result as given by gini decision tree model.***
 
 ---
 
 **Prune trees**
----
+
 
 **Pruning is a data compression technique in machine learning and search algorithms that reduces the size of decision trees by removing sections of the tree that are non-critical and redundant to classify instances.**
+
+**we have used the control paramteres for the tree for prunning as :**
+
+**cp = 0.02,maxcompete = 2, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, maxdepth = 10.**
+
+**cp:The complexity parameter (cp) in rpart is the minimum improvement in the model needed at each node. It’s based on the cost complexity of the model maxsurrogate :number of surrogate splits to evaluate.**
+
+
+**maxdepth : Set the maximum depth of any node of the final tree,xval:  number of cross-validations**
+
+
+---
 
 ```{r results='markup'}	
 
@@ -1659,7 +1695,7 @@ summary(tr_fit)
 **Customers who have stayed longer than 16 months(previously 54) are less likely to churn. Now let’s assess the prediction accuracy of the decision tree model by investigating how well it predicts churn in the test subset. We will begin with the confustion matrix, which is a useful display of classification accuracy. It displays the following information:**
 ---
 
-**true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.**
+**true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.From this confusion matrix, we can see that the model performs well at predicting non-churning customers (1426 correct vs. 272 incorrect) and  predicting churning customers 277  correct vs. 137 incorrect).**
 
 
 ---
