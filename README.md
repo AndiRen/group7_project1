@@ -1,5 +1,7 @@
 # Telco Customer Churn Prediction
 
+![download](https://github.com/AndiRen/group7_project1/blob/main/telco_churn.png)
+
 ### Basic Information
 
 * **Person or organization developing model**: 
