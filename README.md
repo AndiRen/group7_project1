@@ -1,4 +1,4 @@
-# Teleco Customer Churn Prediction
+# Telco Customer Churn Prediction
 
 ### Basic Information
 
