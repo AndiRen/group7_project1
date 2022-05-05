@@ -38,7 +38,7 @@
 
 ### Model Evaluation:
 
-|------| Logistic Regression | Randomforest | SVM | Decision Tree |
+| Model | Logistic Regression | Randomforest | SVM | Decision Tree |
 |------| ------ | -------- | --------- | ------ |
 | Accuracy | 73.5% | 80.3% | 80.9% | 80.63% |
 | Sensitivity | 76.9% |85.3% | 58.8% | 50.45% |
