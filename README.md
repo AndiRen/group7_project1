@@ -4,7 +4,7 @@
 
 ### Basic Information
 
-* **Person or organization developing model**: 
+* **Person or organization developing model**: Andy Christian, Yaxin (Janet) Zhuang, Adhithya Kiran，Yasaswi Kasaraneni
 * **Project date**: April, 2022
 * **Project topic**: Determine if the key risk factors listed by the CDC were good predictors for heart disease and also explore if there are other, less prevalent factors that were also useful predictors. 
 
