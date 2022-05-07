@@ -1,7 +1,7 @@
 ---
 title: "Group 7 Project 2: Models"
-author: "Andy Christian, Yaxin (Janet) Zhuang, Adhithya Kiran"
-date: "4/20/2022"
+author: "Andy Christian, Yaxin (Janet) Zhuang, Adhithya Kiran, Yasaswi Kasaraneni"
+date: "5/01/2022"
 output:
   html_document:
     code_folding: hide
@@ -31,7 +31,6 @@ options(scientific=T, digits = 3)
 
 #load packages
 library(DT)
-library(tidyverse)
 library(ezids)
 library(knitr)
 library(kableExtra)
@@ -51,6 +50,7 @@ library(cowplot)
 library(caTools)
 library(pROC)
 library(ggcorrplot)
+library(tidyverse)
 
 ```
 
@@ -176,36 +176,95 @@ Ready to continue...
 
 <br>
 
+---
+
+# 1. Quick Review of Data Set
+
+This data set is a fictional data set provided by IBM. It includes the demographic information on the customers of a telecommunications company, data on the services each customer used, charges paid (etc.), as well as whether the customer “churned” or not – meaning, whether the customer left the company in the past month. It also includes data on the reason(s) each customer who did leave gave for leaving.
+
+<br>
+
 #### Data Set Structure
 
-```{r}
+```{r, comments=NA}
 str(filtered_joined_churn_df)
 ```
 
 <br>
 
-#### Data Set Decriptive Statistics
+From the graph below, we see that around 27% of customer left the platform within the last month.
+
 
 ```{r}
+options(repr.plot.width = 6, repr.plot.height = 4)
 filtered_joined_churn_df %>%
-  describe()
+group_by(Churn.Label) %>%
+summarise(Count = n())%>%
+mutate(percent = prop.table(Count)*100)%>%
+ggplot(aes(reorder(Churn.Label, -percent), percent), fill = Churn)+
+geom_col(fill = c("#FC4E07", "#E7B800"))+
+geom_text(aes(label = sprintf("%.2f%%", percent)), hjust = 0.01,vjust = -0.5, size =3)+
+theme_bw()+  
+xlab("Churn") +
+ylab("Percent")+
+ggtitle("Churn Percent")
+
+```
+
+<br>
+
+The graph below details the reasons customers gave for leaving.
+Although some customers may have selected the same reason for leaving, they may have categorized how they associated that reason differently. The churn category is used as a fill to provide further detail in understanding the customer perspective.
+We will use these reasons to help us formulate our questions, select appropriate variables to investigate, and contextualize the results:
+
+```{r}
+joined_churn_df %>%
+  filter(!is.na(Churn.Category)) %>%
+  ggplot() +
+  geom_bar(mapping=aes(y=Churn.Reason, fill=Churn.Category), show.legend=TRUE) +
+  labs(title='Reasons for Leaving by Answer', y=('Reason'), x=('Count')) +
+  theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
 
----
+# 2. Quick Review of EDA and SMART QUESTIONS
 
-# 1. Review of EDA and SMART Questions
+Answering SMART Question 1
 
-# 2. Graphs of Variables
+1. Which of the variables in the data set show a statistical difference between the churn and non-churn groupings?
+
+To answer this question, we divided the data into churn and non-churn groups, then visually explored how the data set’s variables differed when divided into these groups. We then tested the differences using 2-sample t-tests, goodness of fit chi squared tests, and chi squared tests of independence. From this we determined that the following 15 variables showed a statistical difference between the churn and non-churn groups:
+
+* `Tenure`
+* `Avg. Monthly Charges`
+* `Avg. Monthly GB Download`
+* `Senior Citizen`
+* `Partner`
+* `Dependents`
+* `Internet Service`
+* `Online Security`
+* `Online Backup`
+* `Tech Support`
+* `Contract Type`
+* `Paperless Billing`
+* `Payment Method`
+* `Satisfaction Score`
+* `Unlimited Data`
+
+Smart Questions to answer with modeling:
+
+* Customers with what behaviors and conditions would likely leave the platform?
+* What services are important to deliver to a customer to keep them with the company?
+
 
 # 3. Models
 
-### 3.1 Logistic Model
+## 3.1 Logistic Model
 
 <br>
 
-#### **Satisfaction Logistic Model** 
+### 3.1.1 Satisfaction Logistic Model 
 
 <br>
 
@@ -391,7 +450,7 @@ The pseudo $r^2$ value for the Satisfaction model, using the McFadden method of 
 
 <br>
 
-#### **Full Logistic Model**
+### 3.1.2 Full Logistic Model
 
 <br>
 
@@ -571,7 +630,7 @@ The pseudo $r^2$ value for the full model, using the McFadden method of calculat
 
 ---
 
-#### **Final Logistic Model**
+### 3.1.3 Final Logistic Model
 
 <br>
 
@@ -580,7 +639,6 @@ To build a better model for the final version, we will drop those variables that
 * `Dependents`
 * `Phone Service`
 * `Contract`
-* `Paperless Billing`
 * `Monthly Charges`
 * `Monthly GB`
 
@@ -608,7 +666,7 @@ To build a better model for the final version, we will drop those variables that
 #+ Tenure.Months, partner
 
 #Build model
-final_logit_model <- glm(Churn.Label ~ Dependents + Phone.Service + Contract + Paperless.Billing + Monthly.Charges + Avg.Monthly.GB.Download, data=filtered_joined_churn_df, family="binomial")
+final_logit_model <- glm(Churn.Label ~ Dependents + Phone.Service + Contract + Monthly.Charges + Avg.Monthly.GB.Download, data=filtered_joined_churn_df, family="binomial")
 #summary(final_logit_model)
 xkabledply(final_logit_model, title="Churn.Label ~ All Factors")
 
@@ -630,7 +688,7 @@ xkabledply(as.table(expcoeff), title='Growth and Decay Factors After Exponentiat
 
 $\frac{p}{q} = `r format(expcoeff[1], digits=6)` * (`r format(expcoeff[2], digits=6)`)^{dependents} * (`r format(expcoeff[3], digits=6)`)^{phone} * (`r format(expcoeff[4], digits=6)`)^{cont1yr}$
 
-$* (`r format(expcoeff[5], digits=6)`)^{cont2yr} * (`r format(expcoeff[6], digits=6)`)^{paperless} * (`r format(expcoeff[7], digits=6)`)^{monthlyCharge} * (`r format(expcoeff[8], digits=6)`)^{monthlyGB}$
+$* (`r format(expcoeff[5], digits=6)`)^{cont2yr} * (`r format(expcoeff[6], digits=6)`)^{monthlyCharge} * (`r format(expcoeff[7], digits=6)`)^{monthlyGB}$
 
 <br>
 
@@ -640,9 +698,7 @@ $* (`r format(expcoeff[5], digits=6)`)^{cont2yr} * (`r format(expcoeff[6], digit
 
 **Coefficient P-values: Final Model**
 
-High p-values for the following factors:
-
-* Monthly GB (0.051)
+All p-values low.
 
 ---
 
@@ -732,18 +788,18 @@ plot(roc_data)
 
 ```{r, comment=NA}
 #calculate McFadden statistics, the pseudo r^2
-all_pr2 = pR2(final_logit_model)
-#all_pr2[4]
+final_pr2 = pR2(final_logit_model)
+#final_pr2[4]
 
 ```
 
-The pseudo $r^2$ value for the final model, using the McFadden method of calculation, is `r all_pr2[4]`. This means that `r round(all_pr2[4], digits=3)*100`% of the variance seen in the data is accounted for by this model.
+The pseudo $r^2$ value for the final model, using the McFadden method of calculation, is `r final_pr2[4]`. This means that `r round(final_pr2[4], digits=3)*100`% of the variance seen in the data is accounted for by this model.
 
 ---
 
 **AIC/BIC and Deviance: Final Model**
 
-* The AIC of the final model is: `r all_logit_model$aic` 
+* The AIC of the final model is: `r final_logit_model$aic` 
 * The Residual Deviance of the final model is: `r final_logit_model$deviance` 
 
 ---
@@ -752,7 +808,7 @@ The pseudo $r^2$ value for the final model, using the McFadden method of calcula
 
 <br>
 
-**Confusion Matrix: Final Model, 0.29 Cut Off**
+**Confusion Matrix: Final Model, 0.26 Cut Off**
 
 ```{r results='markup'}
 
@@ -774,12 +830,12 @@ The pseudo $r^2$ value for the final model, using the McFadden method of calcula
 #0.361
 #0.263
 #0.265
-#0.29 -- 80% recall
+#0.28 -- 80% recall
 
 #Get actual values of churn/non-churn
 predictions_final_model <- final_logit_model$fitted.values
 #Get predictions based off of selected cut off value
-pred_cutoff <- ifelse(predictions_final_model > 0.29, 1, 0)
+pred_cutoff <- ifelse(predictions_final_model > 0.26, 1, 0)
 
 ############################################################
 
@@ -800,7 +856,7 @@ confusion_matrix_cutoff_df <- cbind(Index, confusion_matrix_cutoff_df)
 #Rename columns to identify predicted values
 colnames(confusion_matrix_cutoff_df) <- c("", "Predicted No", "Predicted Yes", "Total")
 #Display Cut Off Confusion Matrix
-xkabledply(confusion_matrix_cutoff_df, title="Confusion Matrix for Final Model With a Cut Off Value of 0.29")
+xkabledply(confusion_matrix_cutoff_df, title="Confusion Matrix for Final Model With a Cut Off Value of 0.26")
 
 
 ########################
@@ -882,24 +938,31 @@ When the Brier Test Method is used for an unbalanced Data Set, the result is:
 
 #### **Final Logistic Model Takeaways**
 
-* Avg. Monthly GB (p-val: 0.051) kept because it connected closely with reasons customers gave for leaving 
+* Customers with avg Monthly Charge (~$65) and no other mitigating factors have a churn risk of about ~60%
 * Long-term contracts biggest factor in keeping customers with the company
 * Roughly every ~100 GB of monthly download decays odds-ratio of customer churning by 10%
-* The overall avg Monthly Charge of ~$65, has a 3-fold growth effect on the odds-ratio of a customer churning
-* Adjusting the cutoff significantly improves recall rate (+25%) while only suffering a minor hit to precision (-8.2%)
-* Brier Test for Log Loss (0.245) shows a model that performs reasonably well 
+* The overall avg Monthly Charge of ~$65, has a 3.6-fold growth effect on the odds-ratio of a customer churning
+* Reducing the Monthly Charge to $55 decreases the growth effect from 3.6 to 3
+* Adjusting the cutoff significantly improves recall rate (+29.1%) while only suffering a minor hit to precision (-7%)
+* Brier Test for Log Loss (0.244) shows a model that performs reasonably well 
 
-#### **Suggestion Based on Model**
+### 3.1.4 Suggestion Based on Model
 
-Offer an additional $10 off monthly charges for customers willing to sign a 2-year contract. Assuming the ideal scenario were this causes all would-be churners to stay with the company, the following benefits are gained:
+Nearly 89% of customers who churned were on month-to-month contracts. It is suggested that the company offer an additional $10 off monthly charges for customers on month-to-month contracts who would be willing to sign a 2-year contract.
 
-* Adjusted cut off saves $~364K a year by 'catching' 25% more of Churners compared to default cut off
-* Adjusted cut off loses an extra ~$91k by offering discounts to customers that wouldn't have churned
-* Value of implementing retainment plan according to model with adjusted cut off: ~$273k a year 
+For a customer who pays the avg Monthly Charge of ~$65 and who has no other mitigating factors, this would reduce the risk of churning from about ~60% to about ~5%. 
+
+Assuming the ideal scenario were all would-be churners who have month-to-month contracts take the deal and sign a 2-year contract, this theoretically reduces the number of customers who churn in this group by about ~91.7%. 
+
+This would result in the following monetary benefits to the company:
+
+* Using plan with adjusted cut off model saves ~$794K a year by retaining ~65% of would-be churners (91.7% of the 88.6% who have month-to-month contracts of the 79.6% of churners the model catches) 
+* Using plan with adjusted cut off model loses an extra ~$76k by offering discounts to customers that wouldn't have churned
+* Total value of implementing retainment plan according to model with adjusted cut off: ~$718k a year
 
 ---
 
-### 3.2 Random Forest Model
+## 3.2 Random Forest Model
 
 #### EDA feature selection
 
@@ -945,10 +1008,10 @@ Avg. Monthly Charges
 Total.Months
 
 ```{r,results='markup'}
-num_columns <- c("Tenure.Months", "Monthly.Charges", "Total.Charges")
+num_columns <- c("Tenure.Months", "Monthly.Charges", "Total.Extra.Data.Charges")
 tg[num_columns] <- sapply(tg[num_columns], as.numeric)
 
-tg_int <- tg[,c("Tenure.Months", "Monthly.Charges", "Total.Charges")]
+tg_int <- tg[,c("Tenure.Months", "Monthly.Charges", "Total.Extra.Data.Charges")]
 tg_int <- data.frame(scale(tg_int))
 head(tg_int,5)
 ```
@@ -1026,15 +1089,15 @@ model.rf <- randomForest(Churn.Label ~ ., data=train, proximity=F,importance = F
 model.rf
 ```
 
-The OOB error estimate comes to around 19.4%, so the model has around 80% out of sample accuracy for the training set. Let's check the prediction and accuracy on validation data.
+The OOB error estimate comes to around 20%, so the model has around 80% out of sample accuracy for the training set. Let's check the prediction and accuracy on validation data.
 
-```{r, results='markup}
+```{r, results='markup'}
 testPred <- predict(model.rf, newdata=validation[,-24])
 #table(testPred2, validation2$Churn.Label)
 
 confusionMatrix(validation$Churn.Label, testPred)
 ```
-The basic RandomForest model gives an accuracy of 79.7%( almost close enough to the OOB estimate), Sensitivity 85.3% and Specificity 62.5%.,
+The basic RandomForest model gives an accuracy of 80.3%( almost close enough to the OOB estimate), Sensitivity 85.3% and Specificity 64%.,
 
 
 **Variable Importance Plot**
@@ -1046,7 +1109,7 @@ Below is the variable importance plot, that shows the most significant attribute
 varImpPlot(model.rf)
 ```
 
-From this we can see that  
+  
 
 **Checking the AUC**
 ```{r}
@@ -1060,23 +1123,101 @@ plot(model.rf.roc,col = "red",print.auc.y = 0.85, print.auc = TRUE )
 
 RandomForest:
 
-Accuracy 79.7%,
+Accuracy 80.3%,
 Sensitivity 85.3%
-Specificity 62.5%
+Specificity 64%
 
 
 
 ---
 
-### 3.3 SVM Model
+## 3.3 SVM Model
+
+```{r}
+str(filtered_joined_churn_df)
+```
+
+```{r}
+view(filtered_joined_churn_df)
+```
+
+```{r}
+my_data <- data.frame(filtered_joined_churn_df$Senior.Citizen,filtered_joined_churn_df$Churn.Label,filtered_joined_churn_df$Partner,filtered_joined_churn_df$Dependents,filtered_joined_churn_df$Tenure.Months,filtered_joined_churn_df$Phone.Service,filtered_joined_churn_df$Online.Security,filtered_joined_churn_df$Online.Backup,filtered_joined_churn_df$Tech.Support,filtered_joined_churn_df$Paperless.Billing,filtered_joined_churn_df$Unlimited.Data,filtered_joined_churn_df$Avg.Monthly.Long.Distance.Charges,filtered_joined_churn_df$Avg.Monthly.GB.Download,filtered_joined_churn_df$Monthly.Charges)
+
+str(my_data)
+```
+
+
+```{r}
+### Libraries used
+library(caret)
+library(class)
+```
+
+```{r}
+## Partition of data
+train_sample<-createDataPartition(y = my_data$filtered_joined_churn_df.Churn.Label, p= 0.7, list = FALSE)
+train_data<-my_data[train_sample, ]
+test_data<-my_data[-train_sample, ]
+train_label<-my_data[train_sample,2]
+test_label<-my_data[-train_sample,2]
+```
+
+```{r}
+### Linear SVM
+svm_linear <- train(filtered_joined_churn_df.Churn.Label ~., data = train_data, method = "svmLinear", trControl=trainControl(method = "repeatedcv", number = 10, repeats = 3), preProcess = c("center", "scale"), tuneLength = 10)
+svm_linear
+```
+
+```{r}
+### Confusion Matrix
+test_pred<-predict(svm_linear,test_data)
+confusionMatrix(table(test_pred,test_data$filtered_joined_churn_df.Churn.Label))
+```
+
+```{r}
+### griding for obtaining best C value
+svm_grid<-train(filtered_joined_churn_df.Churn.Label~., data = train_data, method = "svmLinear", trControl=trainControl("cv", number = 10), tuneGrid = expand.grid(C=seq(0,2,length=20)), preProcess = c("center", "scale"))
+```
+
+```{r}
+# plot model accuracy vs different values of cost
+plot(svm_grid)
+svm_grid$bestTune
+test_predgrid<-predict(svm_grid,test_data)
+```
+
+```{r}
+# Accuracy after finding best parameter
+confusionMatrix(table(test_predgrid,test_data$filtered_joined_churn_df.Churn.Label))
+```
+
+
+```{r results='markup'}
+### ROC Curve
+library(pROC)
+roc_svm_test <-plot(roc(as.numeric(test_data$filtered_joined_churn_df.Churn.Label),as.numeric(test_pred)),main="Comparaison ",col="#1c61b6")
+plot(roc_svm_test, add = TRUE,col = "red", print.auc=TRUE, print.auc.x = 0.5, print.auc.y = 0.3)
+legend(0.3, 0.2, legend = c("test-svm"), lty = c(1), col = c("blue"))
+
+```
 
 ---
 
-### 3.4 Decision Tree Model
+## 3.4 Decision Tree Model
 
 
-**Feature selection**
-***variable importance***
+
+---
+***Omit NA values***
+---
+
+***We have also tried to build the decision tree mode.A decision tree is a type of supervised machine learning used to categorize or make predictions based on how a previous set of questions were answered. The model is a form of supervised learning, meaning that the model is trained and tested on a set of data that contains the desired categorization***
+
+***before building the actual tree , since the data is not so clean, we have tried to clean categorical variables, changing into factors.standardized numerical variables. I have also cleaned the na values***
+***we have a used label encoding for categorical variables.***
+
+***We got the insight from our previous eda that tota extra data charges , avg monthly long dist chanrges has null on whether a customer to churn or not so we removed those variables from the model building.***
 
 ```{r results='hide'}
 
@@ -1108,7 +1249,7 @@ filtered_joined_churn_df %>% drop_na()
 
 ```{r results='markup'}
 
-control <- rfeControl(functions = rpart, # random forest
+control1 <- rfeControl(functions = rpart, # random forest
                       method = "repeatedcv", # repeated cv
                       repeats = 5, # number of repeats
                       number = 10) # number of folds
@@ -1117,6 +1258,8 @@ control <- rfeControl(functions = rpart, # random forest
 
 
 ```
+
+**Label encoding the categorical variables**
 
 ```{r results='markup'}
 
@@ -1155,6 +1298,8 @@ filtered_joined_churn_df$Payment.Method <- label$fit_transform(filtered_joined_c
 
 ```
 
+
+
 ```{r results='markup'}
 
 
@@ -1166,7 +1311,7 @@ filtered_joined_churn_df$Senior.Citizen <- ifelse(filtered_joined_churn_df$Senio
 
 filtered_joined_churn_df$Partner <- ifelse(filtered_joined_churn_df$Partner== "Yes",1,0)
 
-filtered_joined_churn_df$Tenure.Months <- ifelse(filtered_joined_churn_df$Tenure.Months == "Yes",1,0)
+#filtered_joined_churn_df$Tenure.Months <- ifelse(filtered_joined_churn_df$Tenure.Months == "Yes",1,0)
 
 filtered_joined_churn_df$Phone.Service <- ifelse(filtered_joined_churn_df$Phone.Service == "Yes",1,0)
 
@@ -1197,8 +1342,10 @@ n <- filtered_joined_churn_df[myvars]
 
 
 
+my <- c("Senior.Citizen", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security")
 
-myvars <- c("Senior.Citizen", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.Long.Distance.Charges","Avg.Monthly.GB.Download","Monthly.Charges","Tenure.Months")
+u = filtered_joined_churn_df[my]
+
 
 
 
@@ -1209,6 +1356,10 @@ typeof(a)
 nrow(a)
 
 head(a)
+
+
+
+myvars <- c("Senior.Citizen","Churn.Label", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.Long.Distance.Charges","Avg.Monthly.GB.Download","Monthly.Charges","Tenure.Months")
 
 
 
@@ -1236,6 +1387,8 @@ b = as.factor(n["Churn.Label"])
 
 ```
 
+**Features of variable importance**
+
 ```{r results='markup'}
 
 fit_dt = rpart(Churn.Label~., data=filtered_joined_churn_df, method="class", control = list(maxdepth = 4))
@@ -1244,40 +1397,464 @@ varImp(fit_dt)
 
 ```
 
+**Decision Tree with Gini**
 
 
 ```{r results='markup'}
 
-set.seed(1)
-kyphosisfit <- rpart(Churn.Label ~ Senior.Citizen+Partner+Dependents+Tenure.Months+Phone.Service+Online.Security, data=filtered_joined_churn_df, method="class", control = list(maxdepth = 4) )
-# kyphosisfit <- rpart(Kyphosis ~ Age + Number + Start, data=filtered_joined_churn_df, method="class", control = {rpart.control list} )
-# rpart.control(maxdepth = 30, minsplit = 20, minbucket = round(minsplit/3), cp = 0.01, maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, ...)
-printcp(kyphosisfit) # display the results 
-plotcp(kyphosisfit) #
+myvars <- c("Senior.Citizen","Churn.Label", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.GB.Download","Tenure.Months","Internet.Service","Contract")
+
+
+model_df <- filtered_joined_churn_df[myvars]
+
+```
+
+**We have removed Total.Extra.Data.Charges and  Avg.Monthly.Long.Distance.Charges , as it is not significant from the test we performed above**
+
+
+```{r results='markup'}
+set.seed(56)
+library(caret)
+split_train_test <- createDataPartition(model_df$Churn.Label,p=0.7,list=FALSE)
+dtrain<- model_df[split_train_test,]
+dtest<-  model_df[-split_train_test,]
+
+# Remove Total Charges from the training dataset
+
+
+
+```
+---
+**Train-Test data**
+---
+
+```{r results='markup'}
+
+head(dtrain)
+
+head(dtest)
+
+
+
+
+```
+
+
+
+```{r results='markup'}
+
+
+loadPkg("rpart")
+
+library(caret)
+
+library(tidyr)
+
+install.packages("dplyr")
+
+library("dplyr")
+
+library(superml)
+
+loadPkg("caret")
+
+loadPkg("rpart.plot")
+
+loadPkg("rattle")
+
+tr_fit <- rpart(Churn.Label ~., data = dtrain, method="class",na.action = na.exclude)
+rpart.plot(tr_fit)
+
+summary(tr_fit)
+
+```
+---
+---
+**From this decision tree, we can interpret the following:**
+
+**The contract variable is the most important. Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn.** 
+**Customers with DSL internet service are less likely to churn.**
+**Customers who have stayed longer than 54 months are less likely to churn. Now let’s assess the prediction accuracy of the decision tree model by investigating how well it predicts churn in the test subset. We will begin with the confustion matrix, which is a useful display of classification accuracy. It displays the following information:**
+---
+
+**true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.**
+
+
+---
+
+```{r results='markup'}
+
+tr_prob1 <- predict(tr_fit, dtest)
+tr_pred1 <- ifelse(tr_prob1[,2] > 0.5,"Yes","No")
+table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
 
 
 ```
 
 ---
 
+***From this confusion matrix, we can see that the model performs well at predicting non-churning customers (1354 correct vs. 208 incorrect) and  predicting churning customers 341 correct vs. 209 incorrect).***
+
+---
+
+```{r results='markup'}
+
+
+tr_prob2 <- predict(tr_fit, dtrain)
+tr_pred2 <- ifelse(tr_prob2[,2] > 0.5,"Yes","No")
+tr_tab1 <- table(Predicted = tr_pred2, Actual = dtrain$Churn.Label)
+tr_tab2 <- table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
+
+```
+
+```{r results='markup'}
+
+
+# # Train
+# confusionMatrix(
+#   as.factor(tr_pred2),
+#   as.factor(dtrain$Churn.Label),na.action = na.pass,
+#   positive = "Yes" 
+# )
+# 
+# #Test
+# confusionMatrix(
+# as.factor(tr_pred1),
+#   as.factor(dtest$Churn.Label),
+#   positive = "Yes" 
+# )
+
+tr_acc <- sum(diag(tr_tab2))/sum(tr_tab2)
+tr_acc
+
+```
+---
+
+**The overall accuracy of the model is `r round(tr_acc*100, digits=2)`%**
+
+
+---
+```{r results='markup'}
+library(pROC)
+ROC_rf <- roc(dtest$Churn.Label, tr_prob1[,2])
+
+
+ROC_rf_auc <- auc(ROC_rf)
+
+plot(ROC_rf, col = "green", main = "ROC Curve for the decision tree with gini")
+
+
+paste("Accuracy decision tree with gini: ", mean(dtest$Churn.Labe == round(tr_prob1[,2], digits = 0)))
+
+paste("Area under curve for decision tree with gini is: ", ROC_rf_auc)
+
+
+```
+
+---
+
+**This is the auc roc curve for the decision tree with gini parameter**
+
+***The Area Under the Curve (AUC) is the measure of the ability of a classifier to distinguish between classes and is used as a summary of the ROC curve. The higher the AUC, the better the performance of the model at distinguishing between the positive and negative classes.***
+
+---
+
+**The overall accuracy of the decision tree with gini model is `r round(tr_acc*100, digits=2)`%**
+**The AUC of the decision tree with gini  model is `r round(ROC_rf_auc, digits=2)`**
+
+---
+
+
+**Decision Tree with Entropy- rpart**
+
+
+```{r results='markup'}
+
+myvars <- c("Senior.Citizen","Churn.Label", "Partner", "Dependents","Tenure.Months","Phone.Service","Online.Security","Online.Backup","Tech.Support","Paperless.Billing","Unlimited.Data","Avg.Monthly.GB.Download","Tenure.Months","Internet.Service","Contract")
+
+
+model_df <- filtered_joined_churn_df[myvars]
+
+```
+
+**We have removed Total.Extra.Data.Charges and  Avg.Monthly.Long.Distance.Charges , as it is not significant from the test we performed above**
+
+
+```{r results='markup'}
+set.seed(56)
+library(caret)
+split_train_test <- createDataPartition(model_df$Churn.Label,p=0.7,list=FALSE)
+dtrain<- model_df[split_train_test,]
+dtest<-  model_df[-split_train_test,]
+
+# Remove Total Charges from the training dataset
+
+
+
+```
+---
+**Train-Test data**
+---
+
+```{r results='markup'}
+
+head(dtrain)
+
+head(dtest)
+
+
+
+
+```
+
+```{r results='markup'}
+
+
+loadPkg("rpart")
+
+library(caret)
+
+library(tidyr)
+
+install.packages("dplyr")
+
+library("dplyr")
+
+library(superml)
+
+loadPkg("caret")
+
+loadPkg("rpart.plot")
+
+loadPkg("rattle")
+
+tr_fit <- rpart(Churn.Label ~., data = dtrain, method="class",na.action = na.exclude,parms=list(split='entropy'))
+rpart.plot(tr_fit)
+
+summary(tr_fit)
+
+```
+---
+
+**The overall accuracy of the tree model with entropy is `r round(tr_acc*100, digits=2)`%**
+
+**From this decision tree, we can interpret the following:**
+
+**The contract variable is the most important. Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn.** 
+**Customers with DSL internet service are less likely to churn.**
+**Customers who have stayed longer than 54 months are less likely to churn. Now let’s assess the prediction accuracy of the decision tree model by investigating how well it predicts churn in the test subset. We will begin with the confustion matrix, which is a useful display of classification accuracy. It displays the following information:**
+---
+
+**true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.**
+
+
+---
+
+```{r results='markup'}
+
+tr_prob1 <- predict(tr_fit, dtest)
+tr_pred1 <- ifelse(tr_prob1[,2] > 0.5,"Yes","No")
+table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
+
+
+```
+
+```{r results='markup'}
+
+
+tr_prob2 <- predict(tr_fit, dtrain)
+tr_pred2 <- ifelse(tr_prob2[,2] > 0.5,"Yes","No")
+tr_tab1 <- table(Predicted = tr_pred2, Actual = dtrain$Churn.Label)
+tr_tab2 <- table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
+
+```
+
+```{r results='markup'}
+
+
+# # Train
+# confusionMatrix(
+#   as.factor(tr_pred2),
+#   as.factor(dtrain$Churn.Label),na.action = na.pass,
+#   positive = "Yes" 
+# )
+# 
+# #Test
+# confusionMatrix(
+# as.factor(tr_pred1),
+#   as.factor(dtest$Churn.Label),
+#   positive = "Yes" 
+# )
+
+tr_acc <- sum(diag(tr_tab2))/sum(tr_tab2)
+tr_acc
+
+```
+
+```{r results='markup'}
+library(pROC)
+ROC_rf <- roc(dtest$Churn.Label, tr_prob1[,2])
+
+
+ROC_rf_auc <- auc(ROC_rf)
+
+plot(ROC_rf, col = "green", main = "ROC Curve for the decision tree with entropy")
+
+
+paste("Accuracy decision tree with entropy: ", mean(dtest$Churn.Labe == round(tr_prob1[,2], digits = 0)))
+
+paste("Area under curve for decision tree with entropy is: ", ROC_rf_auc)
+
+
+```
+
+**The overall accuracy of the decision tree with entropy model is `r round(tr_acc*100, digits=2)`%**
+**The AUC of the decision tree with entropy model is `r round(ROC_rf_auc, digits=2)`**
+---
+***We have build the decision tree with entropy parameter but surprisingly it gave the same result as given by gini decision tree model.***
+
+---
+
+**Prune trees**
+
+
+**Pruning is a data compression technique in machine learning and search algorithms that reduces the size of decision trees by removing sections of the tree that are non-critical and redundant to classify instances.**
+
+**we have used the control paramteres for the tree for prunning as :**
+
+**cp = 0.02,maxcompete = 2, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, maxdepth = 10.**
+
+**cp:The complexity parameter (cp) in rpart is the minimum improvement in the model needed at each node. It’s based on the cost complexity of the model maxsurrogate :number of surrogate splits to evaluate.**
+
+
+**maxdepth : Set the maximum depth of any node of the final tree,xval:  number of cross-validations**
+
+
+---
+
+```{r results='markup'}	
+
+
+
+tr_fit <- rpart(Churn.Label ~., data = dtrain, method="class",na.action = na.exclude,control = rpart.control(cp = 0.02,maxcompete = 2, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, maxdepth = 10 ))
+
+rpart.plot(tr_fit)
+
+
+
+summary(tr_fit)
+
+```
+---
+---
+**From this decision tree, we can interpret the following:**
+
+**The contract variable is the most important. Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn.** 
+**Customers with DSL internet service are less likely to churn.**
+**Customers who have stayed longer than 16 months(previously 54) are less likely to churn. Now let’s assess the prediction accuracy of the decision tree model by investigating how well it predicts churn in the test subset. We will begin with the confustion matrix, which is a useful display of classification accuracy. It displays the following information:**
+---
+
+**true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.From this confusion matrix, we can see that the model performs well at predicting non-churning customers (1426 correct vs. 272 incorrect) and  predicting churning customers 277  correct vs. 137 incorrect).**
+
+
+---
+
+```{r results='markup'}
+
+tr_prob1 <- predict(tr_fit, dtest)
+tr_pred1 <- ifelse(tr_prob1[,2] > 0.5,"Yes","No")
+table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
+
+
+```
+
+```{r results='markup'}
+
+
+tr_prob2 <- predict(tr_fit, dtrain)
+tr_pred2 <- ifelse(tr_prob2[,2] > 0.5,"Yes","No")
+tr_tab1 <- table(Predicted = tr_pred2, Actual = dtrain$Churn.Label)
+tr_tab2 <- table(Predicted = tr_pred1, Actual = dtest$Churn.Label)
+
+```
+
+```{r results='markup'}
+
+
+# # Train
+# confusionMatrix(
+#   as.factor(tr_pred2),
+#   as.factor(dtrain$Churn.Label),na.action = na.pass,
+#   positive = "Yes" 
+# )
+# 
+# #Test
+# confusionMatrix(
+# as.factor(tr_pred1),
+#   as.factor(dtest$Churn.Label),
+#   positive = "Yes" 
+# )
+
+tr_acc <- sum(diag(tr_tab2))/sum(tr_tab2)
+tr_acc
+
+```
+
+```{r results='markup'}
+library(pROC)
+ROC_rf <- roc(dtest$Churn.Label, tr_prob1[,2])
+
+
+ROC_rf_auc <- auc(ROC_rf)
+
+plot(ROC_rf, col = "green", main = "ROC Curve for the prune tree")
+
+
+paste("Accuracy : ", mean(dtest$Churn.Labe == round(tr_prob1[,2], digits = 0)))
+
+paste("Area under curve for prune tree model is: ", ROC_rf_auc)
+
+
+```
+
+
+---
+
+**The overall accuracy of the prune tree model is `r round(tr_acc*100, digits=2)`%**
+**The AUC of the prune tree model is `r round(ROC_rf_auc, digits=2)`**
+---
+
+**Prune model is best than other models in terms of accuracy, efficiency and roc value**
+
+---
+
+
 
 
 # 4. Model Comparisons
 
-### 4.1 Accuarcy of Models
+## 4.1 Accuarcy of Models
+
+The Prune Tree Model had the best combined accuracy and AUC
+
+*More to add in summary paper*
 
 ---
 
-### 4.2 Log Loss of Models
+## 4.3 Final Model Selection
 
----
+The Prune tree is selected as the final model
 
-### 4.3 Final Model Selection
+*More to add in summary paper*
 
 ---
 
 # 5. Answering SMART Questions
 
+*More to add in summary paper*
+
 ---
 
 # 6. Summary
+
+*More to add in summary paper*
