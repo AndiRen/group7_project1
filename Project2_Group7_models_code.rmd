@@ -1843,7 +1843,7 @@ The Prune Tree Model had the best combined accuracy and AUC
 
 ## 4.3 Final Model Selection
 
-The Prune tree is selected as the final model
+After comparing the accuracy, sensitivity, specificity, and AUC value, the prune tree has the best performence in all cases. Therefore the prune tree is selected as the final model.
 
 *More to add in summary paper*
 
@@ -1851,6 +1851,13 @@ The Prune tree is selected as the final model
 
 # 5. Answering SMART Questions
 
+We have two questions:
+
+**Customers with what behaviors and conditions would likely leave the platform?**
+
+**What services are important to deliver to a customer to keep them with the company?**
+
+- According to the model analysis, we found a couple of important feature that would affect whether customers decide to churn or not churn. For example, important features from random forest model includes total charges, tenure months, monthly charges, internet service xfiber optic
 *More to add in summary paper*
 
 ---
