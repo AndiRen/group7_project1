@@ -1834,6 +1834,12 @@ paste("Area under curve for prune tree model is: ", ROC_rf_auc)
 # 4. Model Comparisons
 
 ## 4.1 Accuarcy of Models
+ 
+Accuracy of each model:
+Logistic Regression :73.5%
+Random Forest Model: 80.3%
+SVM: 80.9%
+Decision Tree: 80.63%
 
 The Prune Tree Model had the best combined accuracy and AUC
 
@@ -1857,11 +1863,11 @@ We have two questions:
 
 **What services are important to deliver to a customer to keep them with the company?**
 
-- According to the model analysis, we found a couple of important feature that would affect whether customers decide to churn or not churn. For example, important features from random forest model includes total charges, tenure months, monthly charges, internet service xfiber optic
+- According to the model analysis, we found a couple of important features that would affect whether customers decide to churn or not churn. For example,vfeatures from the random forest model would make impact on whether customers decide to churn or not churn include total charges, tenure months, monthly charges, internet service with fiber optic, dependents, payment method with an electronic check, contract two years, contract one year, tech support, and paperless billing. Since total charges, tenure months, and monthly charges rank the top 3 in importance, therefore a reasonable price plan will be important to keep customer with plaforms.
 *More to add in summary paper*
 
 ---
 
 # 6. Summary
-
+From the model analysis, we have the prune tree is selected as the final model.
 *More to add in summary paper*
