@@ -1,7 +1,7 @@
 ---
-title: "Group 7 Project 2: Models"
+title: "Group 7 Project 2: Models -- Summary Paper"
 author: "Andy Christian, Yaxin (Janet) Zhuang, Adhithya Kiran, Yasaswi Kasaraneni"
-date: "5/01/2022"
+date: "5/08/2022"
 output:
   html_document:
     code_folding: hide
@@ -1864,13 +1864,6 @@ Decision Tree: 80.63%
 
 The Prune Tree Model had the best combined accuracy and AUC
 
-
-
-
-*More to add in summary paper*
-
-=======
-
 ---
 
 ## 4.3 Final Model Selection
@@ -1893,10 +1886,6 @@ Random forest has close accuracy to the prune tree , but lower auc score than pr
 
 
 Decision tree has 9 levels where prune tree has only 6 levels. Prune tree gives more clear picture of feature 'Tenure months' and 'Average monthly gb downloaded'
-
-*More to add in summary paper*
-
-=======
 
 ---
 
