@@ -1861,9 +1861,15 @@ We have two questions:
 
 **Customers with what behaviors and conditions would likely leave the platform?**
 
+- From the prune tree,Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn. Customers with DSL internet service are less likely to churn. Customers who have stayed longer than 16 months(previously 54) are less likely to churn
+
 **What services are important to deliver to a customer to keep them with the company?**
 
 - According to the model analysis, we found a couple of important features that would affect whether customers decide to churn or not churn. For example,vfeatures from the random forest model would make impact on whether customers decide to churn or not churn include total charges, tenure months, monthly charges, internet service with fiber optic, dependents, payment method with an electronic check, contract two years, contract one year, tech support, and paperless billing. Since total charges, tenure months, and monthly charges rank the top 3 in importance, therefore a reasonable price plan will be important to keep customer with plaforms.
+
+
+
+
 *More to add in summary paper*
 
 ---
