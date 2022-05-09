@@ -1841,7 +1841,11 @@ Random Forest Model: 80.3%
 SVM: 80.9%
 Decision Tree: 80.63%
 
+
+
 The Prune Tree Model had the best combined accuracy and AUC
+
+
 
 *More to add in summary paper*
 
@@ -1850,6 +1854,22 @@ The Prune Tree Model had the best combined accuracy and AUC
 ## 4.3 Final Model Selection
 
 After comparing the accuracy, sensitivity, specificity, and AUC value, the prune tree has the best performence in all cases. Therefore the prune tree is selected as the final model.
+
+The overall accuracy of the decision tree with entropy model is 80.26% The AUC of the decision tree with entropy model is 0.82
+
+The overall accuracy of the prune tree model is 80.63% The AUC of the prune tree model is 0.82.
+
+Sensity : 50.45%
+Specificity : 91.23%
+
+Prune gives higher accuacy with lower levels than decision tree with entropy or gini parametre.
+
+As this is a binary classification, we have used auc score for comparing the model as a parametre .
+Random forest has close accuracy to the prune tree , but lower auc score than prune tree,also the decision tree model gives high importance to a particular set of features. But the random forest chooses features randomly during the training process. Therefore, it does not depend highly on any specific set of features,making to opt for prune tree over random forest.
+
+
+
+Decision tree has 9 levels where prune tree has only 6 levels. Prune tree gives more clear picture of feature 'Tenure months' and 'Average monthly gb downloaded'
 
 *More to add in summary paper*
 
