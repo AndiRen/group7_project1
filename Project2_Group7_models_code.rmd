@@ -1904,5 +1904,5 @@ We have two questions:
 
 - Another example, as explored in the Logistic Model, would be developing special deals to offer customers in order to get them to agree to a 1-year or 2-year contract, as being in a long-term contract significantly reduced the risk of churning. Several of the models found this feature to be an important one.
 
-- It is evident from prune tree that customers who has 16 months or more cotract has low chance of churning than others, if the company need to keep their customers it is advisible to devise attractive 2 year long contrcat plans 
+- It is evident from prune tree that customers who has 16 months or more contract has low chance of churning than others, if the company need to keep their customers it is advisable to devise attractive 2 year long contract plans 
 
