@@ -1209,7 +1209,9 @@ legend(0.3, 0.2, legend = c("test-svm"), lty = c(1), col = c("blue"))
 
 
 ---
+
 ***Omit NA values***
+
 ---
 
 ***We have also tried to build the decision tree mode.A decision tree is a type of supervised machine learning used to categorize or make predictions based on how a previous set of questions were answered. The model is a form of supervised learning, meaning that the model is trained and tested on a set of data that contains the desired categorization***
@@ -1424,8 +1426,11 @@ dtest<-  model_df[-split_train_test,]
 
 
 ```
+
 ---
+
 **Train-Test data**
+
 ---
 
 ```{r results='markup'}
@@ -1468,13 +1473,15 @@ rpart.plot(tr_fit)
 summary(tr_fit)
 
 ```
+
 ---
----
+
 **From this decision tree, we can interpret the following:**
 
 **The contract variable is the most important. Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn.** 
 **Customers with DSL internet service are less likely to churn.**
 **Customers who have stayed longer than 54 months are less likely to churn. Now let’s assess the prediction accuracy of the decision tree model by investigating how well it predicts churn in the test subset. We will begin with the confustion matrix, which is a useful display of classification accuracy. It displays the following information:**
+
 ---
 
 **true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.**
@@ -1528,12 +1535,14 @@ tr_acc <- sum(diag(tr_tab2))/sum(tr_tab2)
 tr_acc
 
 ```
+
 ---
 
 **The overall accuracy of the model is `r round(tr_acc*100, digits=2)`%**
 
 
 ---
+
 ```{r results='markup'}
 library(pROC)
 ROC_rf <- roc(dtest$Churn.Label, tr_prob1[,2])
@@ -1592,8 +1601,11 @@ dtest<-  model_df[-split_train_test,]
 
 
 ```
+
 ---
+
 **Train-Test data**
+
 ---
 
 ```{r results='markup'}
@@ -1634,6 +1646,7 @@ rpart.plot(tr_fit)
 summary(tr_fit)
 
 ```
+
 ---
 
 **The overall accuracy of the tree model with entropy is `r round(tr_acc*100, digits=2)`%**
@@ -1643,6 +1656,7 @@ summary(tr_fit)
 **The contract variable is the most important. Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn.** 
 **Customers with DSL internet service are less likely to churn.**
 **Customers who have stayed longer than 54 months are less likely to churn. Now let’s assess the prediction accuracy of the decision tree model by investigating how well it predicts churn in the test subset. We will begin with the confustion matrix, which is a useful display of classification accuracy. It displays the following information:**
+
 ---
 
 **true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.**
@@ -1710,7 +1724,9 @@ paste("Area under curve for decision tree with entropy is: ", ROC_rf_auc)
 
 **The overall accuracy of the decision tree with entropy model is `r round(tr_acc*100, digits=2)`%**
 **The AUC of the decision tree with entropy model is `r round(ROC_rf_auc, digits=2)`**
+
 ---
+
 ***We have build the decision tree with entropy parameter but surprisingly it gave the same result as given by gini decision tree model.***
 
 ---
@@ -1745,13 +1761,15 @@ rpart.plot(tr_fit)
 summary(tr_fit)
 
 ```
+
 ---
----
+
 **From this decision tree, we can interpret the following:**
 
 **The contract variable is the most important. Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn.** 
 **Customers with DSL internet service are less likely to churn.**
 **Customers who have stayed longer than 16 months(previously 54) are less likely to churn. Now let’s assess the prediction accuracy of the decision tree model by investigating how well it predicts churn in the test subset. We will begin with the confustion matrix, which is a useful display of classification accuracy. It displays the following information:**
+
 ---
 
 **true positives (TP): These are cases in which we predicted yes (they churned), and they did churn. true negatives (TN): We predicted no, and they didn’t churn. false positives (FP): We predicted yes, but they didn’t actually churn. (Also known as a “Type I error.”) false negatives (FN): We predicted no, but they actually churned. (Also known as a “Type II error.”) Let’s examine the confusion matrix for our decision tree model.From this confusion matrix, we can see that the model performs well at predicting non-churning customers (1426 correct vs. 272 incorrect) and  predicting churning customers 277  correct vs. 137 incorrect).**
@@ -1822,6 +1840,7 @@ paste("Area under curve for prune tree model is: ", ROC_rf_auc)
 
 **The overall accuracy of the prune tree model is `r round(tr_acc*100, digits=2)`%**
 **The AUC of the prune tree model is `r round(ROC_rf_auc, digits=2)`**
+
 ---
 
 **Prune model is best than other models in terms of accuracy, efficiency and roc value**
@@ -1843,15 +1862,11 @@ Decision Tree: 80.63%
 
 The Prune Tree Model had the best combined accuracy and AUC
 
-*More to add in summary paper*
-
 ---
 
 ## 4.3 Final Model Selection
 
 After comparing the accuracy, sensitivity, specificity, and AUC value, the prune tree has the best performence in all cases. Therefore the prune tree is selected as the final model.
-
-*More to add in summary paper*
 
 ---
 
@@ -1861,19 +1876,12 @@ We have two questions:
 
 **Customers with what behaviors and conditions would likely leave the platform?**
 
-- From the prune tree,Customers with month-to-month contracts are more likely to churn.Customers who has a dependents (value=1) has the higher chance to churn. Customers with DSL internet service are less likely to churn. Customers who have stayed longer than 16 months(previously 54) are less likely to churn
+- From the prune tree, Customers with month-to-month contracts are more likely to churn. Customers who has a dependents (value=1) has the higher chance to churn. Customers with DSL internet service are less likely to churn. Customers who have stayed longer than 16 months(previously 54) are less likely to churn.
 
 **What services are important to deliver to a customer to keep them with the company?**
 
 - According to the model analysis, we found a couple of important features that would affect whether customers decide to churn or not churn. For example,vfeatures from the random forest model would make impact on whether customers decide to churn or not churn include total charges, tenure months, monthly charges, internet service with fiber optic, dependents, payment method with an electronic check, contract two years, contract one year, tech support, and paperless billing. Since total charges, tenure months, and monthly charges rank the top 3 in importance, therefore a reasonable price plan will be important to keep customer with plaforms.
 
 
+- Another example, as explored in the Logistic Model, would be developing special deals to offer customers in order to get them to agree to a 1-year or 2-year contract, as being in a long-term contract significantly reduced the risk of churning. Several of the models found this feature to be an important one.
 
-
-*More to add in summary paper*
-
----
-
-# 6. Summary
-From the model analysis, we have the prune tree is selected as the final model.
-*More to add in summary paper*
