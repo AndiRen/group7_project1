@@ -44,7 +44,7 @@ vignettes/*.pdf
 ########################
 
 # for knitted html
-*.html
+#*.html
 # for MacOS system files
 .DS_Store
 Icon
